@@ -5,4 +5,4 @@ for (p in requiredPackages) {
     suppressMessages(library(p,character.only=TRUE))
 }
 
-runApp('../shinyTest')
+runApp('../shinyTest', launch.browser=TRUE)
