@@ -1,0 +1,18 @@
+body {
+  background-color: #e3e5f0; /* #ffffff; */
+}
+
+#selector,
+.container,
+.navbar-inner {
+    background-color: #9dabd3 !important;
+}
+
+.navbar-static-top {
+  position: static;
+  margin-bottom: 15px;
+  /* background-color: #AAAAAA !important; */
+  border-bottom-left-radius: 25px;
+  border-bottom-right-radius: 25px;
+  border:  1px solid grey;
+}
