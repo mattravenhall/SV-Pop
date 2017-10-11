@@ -6,9 +6,9 @@ Section to be completed, tool currently in development.
 Section to be completed, tool currently in development.
 
 DEFAULT
---CONVERT
---MERGE
---FILTER
+CONVERT
+MERGE
+FILTER
 
 ## Visualisation
 Section to be completed, tool currently in development.
