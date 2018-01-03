@@ -10,8 +10,15 @@ Section to be completed, tool currently in development.
 - MERGE
 - FILTER
 
+Input > Process > Output
+
 ## Visualisation
 Section to be completed, tool currently in development.
+
+```bash
+./prepFiles.py
+Rscript easyRun.r
+```
 
 - Annotation file
 - Population file
