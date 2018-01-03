@@ -12,3 +12,8 @@ Section to be completed, tool currently in development.
 
 ## Visualisation
 Section to be completed, tool currently in development.
+
+- Annotation file
+- Population file
+- Variants output
+- Windows output
