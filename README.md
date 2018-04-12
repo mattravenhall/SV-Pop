@@ -7,8 +7,9 @@ Section to be completed, tool currently in development.
 
 - DEFAULT
 - CONVERT
-- MERGE
+- MERGE(-CHR)(-MODEL)
 - FILTER
+- PREPROCESS
 
 Input > Process > Output
 
