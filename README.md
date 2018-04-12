@@ -9,6 +9,7 @@ Section to be completed, tool currently in development.
 - CONVERT
 - MERGE(-CHR)(-MODEL)
 - FILTER
+- SUBSET
 - PREPROCESS
 
 Input > Process > Output
