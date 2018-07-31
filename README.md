@@ -5,6 +5,8 @@ Section to be completed, tool currently in development.
 ## Analysis
 Section to be completed, tool currently in development.
 
+![Preview Anaylsis](https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Preview_Analysis.png)
+
 ```bash
 SVPop.py -h
 ```
@@ -20,6 +22,8 @@ Input > Process > Output
 
 ## Visualisation
 Section to be completed, tool currently in development.
+
+![Preview Visualiser](https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Preview_Visualisation.png)
 
 ```bash
 ./prepFiles.py
