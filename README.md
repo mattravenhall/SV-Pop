@@ -5,6 +5,10 @@ Section to be completed, tool currently in development.
 ## Analysis
 Section to be completed, tool currently in development.
 
+```bash
+SVPop.py -h
+```
+
 - DEFAULT
 - CONVERT
 - MERGE(-CHR)(-MODEL)
