@@ -1,13 +1,13 @@
 # SV-Pop
 Section to be completed, tool currently in development. More information can be found in the [manuscript](LINK_NEEDED).
 
-![Pipeline Image](https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Figure1_Diagram.png)
+![Pipeline Image](https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Pipeline.png)
 
 
 ## Analysis
 Section to be completed, tool currently in development.
 
-![Preview Anaylsis](https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Preview_Analysis.png)
+![Preview Anaylsis](https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Preview_Analysis.png)
 
 ```bash
 SVPop.py -h
@@ -25,7 +25,7 @@ Input > Process > Output
 ## Visualisation
 Section to be completed, tool currently in development.
 
-![Preview Visualiser](https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Preview_Visualisation.png)
+![Preview Visualiser](https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Preview_Visualisation.png)
 
 ```bash
 ./prepFiles.py
