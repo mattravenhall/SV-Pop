@@ -1,5 +1,7 @@
 # SV-Pop
-Section to be completed, tool currently in development.
+Section to be completed, tool currently in development. More information can be found in the [manuscript](LINK_NEEDED).
+
+![Pipeline Image](https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Figure1_Diagram.png)
 
 
 ## Analysis
@@ -34,3 +36,6 @@ Rscript easyRun.r
 - Population file
 - Variants output
 - Windows output
+
+## Citation
+Ravenhall M XXXXXXXXXXXXXXXX.
