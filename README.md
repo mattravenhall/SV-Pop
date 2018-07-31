@@ -7,7 +7,7 @@ Section to be completed, tool currently in development. More information can be 
 ## Analysis
 Section to be completed, tool currently in development.
 
-![Preview Anaylsis](https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Preview_Analysis.png)
+![Preview Analysis](https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Preview_Analysis.png)
 
 ```bash
 SVPop.py -h
