@@ -132,7 +132,7 @@ if __name__ == "__main__":
         '{colInfo} Usage: SVPop.py --command=argument\n'+
         '\n Required Arguments\n'+
         '  --inFile, -F\t\tFile containing a list of vcf files from DELLY.\n'+
-        '  --model, -M\t\tDELLY model. (DUP,DEL,INS,INV)\n'+
+        '  --model, -M\t\tVariant type. (DUP,DEL,INS,INV)\n'+
         '  --refFile, -R\t\tAnnotation reference file. (gtf,gff,csv,tsv)\t\t(if doAnnotation is True)\n'+ # Must be formatted with four columns (Chromosome, Start, End, Gene)
         '\n Additional Arguments\n'+
         "  --subPops, -P\t\tTab-seperated file with 'Samples' and sub-pop columns.\n"+
