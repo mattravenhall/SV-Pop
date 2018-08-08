@@ -42,7 +42,7 @@ with open("requirements.txt") as f:
             sys.exit()
 
 # Set up PATH
-if binary_query('Add outbreaker to PATH?'):
+if binary_query('Add SVPop to PATH?'):
     if platform.system() == 'Darwin':
         add2path = subprocess.Popen("cp ~/.bash_profile ~/.bash_profile.save.preSVPop; echo '\n# Appended by SV-Pop\n'export PATH='\"$PATH:{0}\"' >> ~/.bash_profile; chmod +x {0}/SVPop".format(os.getcwd()), shell=True, stdout=subprocess.PIPE)
         add2path.wait()
