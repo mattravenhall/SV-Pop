@@ -1213,7 +1213,7 @@ def analyseChr(chrChunk):
             if MoreQual:
                 # Longer reads with poor PE support tend to be false, removing.
                 if doFiltering:
-                    outDat = outDat.loc[-((outDat.Length >= 500) & (outDat.PE == 0))]
+                    outDat = outDat.loc[-((outDat.Length.map(int) >= 500) & (outDat.PE == 0))]
 
             outDat = outDat[['Chromosome','Start','End','Length','Type','Quality','Precision']+readCols+qualCols+['Samples','Phase']]
 
