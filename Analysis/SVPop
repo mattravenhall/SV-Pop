@@ -1210,10 +1210,9 @@ def analyseChr(chrChunk):
             if MODEL != 'INS': # Only for non-INS
                 outDat['Length'] = (outDat.End.astype(int) - outDat.Start.astype(int))
 
-            if MoreQual:
-                # Longer reads with poor PE support tend to be false, removing.
-                if doFiltering:
-                    outDat = outDat.loc[-((outDat.Length.map(int) >= 500) & (outDat.PE == 0))]
+            # Longer reads with poor PE support tend to be false, removing.
+            if MoreQual and doFiltering and MODEL != 'INS':
+                outDat = outDat.loc[-((outDat.Length >= 500) & (outDat.PE == 0))]
 
             outDat = outDat[['Chromosome','Start','End','Length','Type','Quality','Precision']+readCols+qualCols+['Samples','Phase']]
 
