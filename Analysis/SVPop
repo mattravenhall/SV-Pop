@@ -257,6 +257,7 @@ if __name__ == "__main__":
         '  --feature\t\tID or name of gene, ie. a gene. which to subset to.\n'+
         "  --region\t\tRegion to subset to, formatted as 'chromosome:basepairA-basepairB'.\n"+
         '\n Optional Arguments\n'+
+        "  --statsOnly\t\tSkip writing the subset to file, returning only stats.\t(default:{statsOnly})\n"+
         "  --outFile, -O\t\tOutput file name (shared for all outputs).\t\t(default:'Subset'){colReset}\n").format(**globals()),flush=True)
         sys.exit()
     elif len(sys.argv) == 2 and ('--PREPROCESS' in sys.argv):
