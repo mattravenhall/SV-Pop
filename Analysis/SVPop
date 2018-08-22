@@ -880,7 +880,7 @@ def getSubset(variantFile, region=None, feature=None, statsOnly=False):
         sys.exit()
 
     printT('Reading in variant file: {0}.'.format(variantFile))
-    variantFile = pd.read_csv(variantFile)
+    variantFile = pd.read_csv(variantFile, low_memory=False)
 
     if feature != None:
         if 'Feature' not in variantFile.columns:
@@ -904,7 +904,7 @@ def getSubset(variantFile, region=None, feature=None, statsOnly=False):
             sys.exit()
 
         printT('Subsetting to {0}.'.format(region))
-        variantFile = variantFile.loc[(variantFile['Chromosome'] == chromosome) & (variantFile['Start'] < int(bpB)) & (variantFile['End'] > int(bpA))]
+        variantFile = variantFile.loc[(variantFile['Chromosome'].map(str) == str(chromosome)) & (variantFile['Start'].map(int) <= int(bpB)) & (variantFile['End'].map(int) >= int(bpA))]
 
     variantFile = variantFile.sort_values(by='Count', ascending=False)
 
