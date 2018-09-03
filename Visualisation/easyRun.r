@@ -5,4 +5,4 @@ for (p in requiredPackages) {
     suppressMessages(library(p,character.only=TRUE))
 }
 
-runApp('../SVPop', launch.browser=TRUE)
+runApp('../Visualisation', launch.browser=TRUE)
