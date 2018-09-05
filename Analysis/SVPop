@@ -1018,7 +1018,7 @@ def analyseChr(chrChunk):
                     skippedFiles.append(SampleID+' ('+chrChunk+')')
                 else:
                     # Clean to vitals
-                    dat = dat.assign(End=dat.Info.str.partition('END=')[2].str.partition(';')[0])
+                    dat = dat.assign(End=dat.Info.str.partition(';END=')[2].str.partition(';')[0])
                     dat = dat.assign(Precision=dat.Info.str.partition(';')[0])
                     dat = dat.assign(Samples=SampleID.partition('.')[0].split('/')[-1]) # remove file suffix and directories
 
