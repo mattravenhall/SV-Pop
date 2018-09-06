@@ -1,17 +1,16 @@
 # SV-Pop
-Section currently in development. More information can be found in the [manuscript](LINK_NEEDED).
+Public documentation currently in development.
 
-![Pipeline Image](https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Pipeline.png)
-
+<img src="https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Pipeline.png" alt="Pipeline Overview" width="400"/>
 
 ## Analysis
-Section currently in development.
 
-![Preview Analysis](https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Preview_Analysis.png)
 
 ```bash
-SVPop.py -h
+SVPop -h
 ```
+
+<img src="https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Preview_Analysis.png" alt="Preview Analysis" width="800"/>
 
 - DEFAULT
 - CONVERT
@@ -23,14 +22,13 @@ SVPop.py -h
 Input > Process > Output
 
 ## Visualisation
-Section currently in development.
-
-![Preview Visualiser](https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Preview_Visualisation.png)
 
 ```bash
-./prepFiles.py
+SVPop --PREPROCESS --variantFile=PREFIX
 Rscript easyRun.r
 ```
+
+<img src="https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Preview_Visualisation.png" alt="Preview Visualiser"/>
 
 - Annotation file
 - Population file
