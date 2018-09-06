@@ -3,8 +3,7 @@ Public documentation currently in development.
 
 <img src="https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Pipeline.png" alt="Pipeline Overview" width="400"/>
 
-## Analysis
-
+## Analysis Module
 
 ```bash
 SVPop -h
@@ -14,14 +13,16 @@ SVPop -h
 
 - DEFAULT
 - CONVERT
-- MERGE(-CHR)(-MODEL)
 - FILTER
+- MERGE-CHR
+- MERGE-MODEL
 - SUBSET
+- STATS
 - PREPROCESS
 
 Input > Process > Output
 
-## Visualisation
+## Visualisation Module
 
 ```bash
 SVPop --PREPROCESS --variantFile=PREFIX
