@@ -8,35 +8,34 @@ SV-Pop is designed for post-discovery SV analysis and visualisation, and therefo
 ## Analysis Module
 <img src="https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Preview_Analysis.png" alt="Preview Analysis" width="800"/>
 
-Quick start:
+### Quick start:
 ```bash
 SVPop -h
 ```
 
-- DEFAULT
-- CONVERT
-- FILTER
-- MERGE-CHR
-- MERGE-MODEL
-- SUBSET
-- STATS
-- PREPROCESS
-
-Input > Process > Output
+### Functions
+- `DEFAULT`: Process individual vcf files to population-level lists.
+- `CONVERT`: Convert a variant output file into a window file.
+- `FILTER`: Filter a variant output file by a range of factors.
+- `MERGE-CHR`: Merge per-chromosome variants files into one file.
+- `MERGE-MODEL`: Merge by-model variants files into one file.
+- `SUBSET`: Create a subset of a given variant or window file.
+- `STATS`: Produce summary statistics for a variant or window files.
+- `PREPROCESS`:	Process analysis output files for visualisation.
 
 ## Visualisation Module
 <img src="https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Preview_Visualisation.png" alt="Preview Visualiser"/>
 
-Quick start:
+### Quick start:
 ```bash
 SVPop --PREPROCESS --variantFile=PREFIX
 Rscript easyRun.r
 ```
-
-- Annotation file
-- Population file
-- Variants output
-- Windows output
+### Input Files
+- `Annotation file`: 
+- `Population file`: 
+- `Variants output`: 
+- `Windows output`: 
 
 ## Citation
 Ravenhall M XXXXXXXXXXXXXXXX.
