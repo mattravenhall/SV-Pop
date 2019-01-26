@@ -8,14 +8,14 @@ Extended documentation, including specifics regarding input files, is present on
 ## Analysis Module
 <img src="https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Preview_Analysis.png" alt="Preview Analysis" width="800"/>
 
-Quick start:
+### Quick start:
 ```bash
 SVPop -h
 ```
 
-### Run Modes
-- `'DEFAULT'`: Collate post-discovery per-sample per-type SV files for analysis.
-- `CONVERT`: Convert a variant output file into a windows file.
+### Functions
+- `DEFAULT`: Process individual vcf files to population-level lists.
+- `CONVERT`: Convert a variant output file into a window file.
 - `FILTER`: Filter a variant output file by a range of factors.
 - `MERGE-CHR`: Merge per-chromosome variants files into one file.
 - `MERGE-MODEL`: Merge by-model variants files into one file.
@@ -28,7 +28,7 @@ Expanded help can be found on the [wiki](https://github.com/mattravenhall/SV-Pop
 ## Visualisation Module
 <img src="https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Preview_Visualisation.png" alt="Preview Visualiser"/>
 
-Quick start:
+### Quick start:
 ```bash
 SVPop --PREPROCESS --variantFile=YOUR_PREFIX
 Rscript easyRun.r
