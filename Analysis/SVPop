@@ -10,14 +10,11 @@
 #   -Numpy 1.10.4+                                                  #
 #####################################################################
 
-# NB: Read number pull lines are currently commented, consider including.
 # NB: Frequency statistic is calculated as percentage of parsed, not given, samples.
-# TODO: Consider a more flexible 'merge variants' function (merges variants with similar positions (ie. start and end within Xbp)).
-# TODO: Consider combining the inFile (vcf paths) and pheno file (subPop info), perhaps with a 'PATH' column which 'SAMPLE' is inferred from.
 
-VERSION_NUM =  '1.0' #'1.4.17'
-VERSION_NAME = 'Hello World'
-VERSION_NOTES = 'First public release.'
+VERSION_NUM =  '1.1'
+VERSION_NAME = 'Howdy World'
+VERSION_NOTES = 'Now includes test sets and some bug fixes.'
 
 import gc
 import os
@@ -56,7 +53,7 @@ windowType = 'popCount'         # 'variantCount' or 'popCount', hidden option. v
 writeSamples = True
 mergeChr = True
 doFst = True
-calcScore = True
+calcScore = False
 
 # Window variables
 windowSize  = 1000
@@ -136,52 +133,50 @@ if __name__ == "__main__":
         '  --model, -M\t\tVariant type. (DUP,DEL,INS,INV)\n'+
         '  --refFile, -R\t\tAnnotation reference file. (gtf,gff,csv,tsv)\t\t(if doAnnotation is True)\n'+ # Must be formatted with four columns (Chromosome, Start, End, Gene)
         '\n Additional Arguments\n'+
-        "  --subPops, -P\t\tTab-seperated file with 'Samples' and sub-pop columns.\n"+
-        '  --refFormat\t\tBypass reference format detection. (gtf,gff,csv,tsv)\t(default:{refFormat})\n'+
-        '  --refType\t\tSpecify a feature type to annotate with. (gtf/gff only)\t(default:{refType})\n'+
-        '  --refTypeID\t\tSpecify a feature ID to annotate with. (gtf/gff only)\t(default:{refType})\n'+
-        '  --chr\t\t\tSpecify a subset of chromosomes, separated by commas.\t(default:All)\n'+
+        "  --subPops, -P\t\tTab-separated file with 'Samples' and sub-pop columns.\n"+
+        '  --refFormat\t\tBypass reference format detection. (gtf,gff,csv,tsv)\t(default: {refFormat})\n'+
+        '  --refType\t\tSpecify a feature type to annotate with. (gtf/gff only)\t(default: {refType})\n'+
+        '  --refTypeID\t\tSpecify a feature ID to annotate with. (gtf/gff only)\t(default: {refType})\n'+
+        '  --chr\t\t\tSpecify a subset of chromosomes, separated by commas.\t(default: All)\n'+
         '\n Output Formatting\n'+
-        "  --outFile, -O\t\tOutput file name (shared for all outputs).\t\t(default:{outFile})\n"+
-        '  --writeVariants\tWhether to write out pre-windows variants file.\t\t(default:{writeVariants})\n'+
-        '  --writeWindows\tWhether to write out windows stats file.\t\t(default:{writeWindows})\n'+
-        '  --doAnnotation\tWhether to annotate the final output.\t\t\t(default:{doAnnotation})\n'+
-        '  --includeReads\tWhether to include median read counts.\t\t\t(default:{IncludeReads})\n'+
-        '  --moreQuality\t\tWhether to include PE count, SR count and median MAPQ.\t(default:{MoreQual})\n'+
-        '  --suppressWarnings\tWhether to silence warning messages (not errors).\t(default:{suppressWarnings})\n'+
-        '  --filterGaps\t\tWhether to remove variants overlapping known gaps.\t(default:{filterGaps})\n'+
+        "  --outFile, -O\t\tOutput file name (shared for all outputs).\t\t(default: {outFile})\n"+
+        '  --writeVariants\tWhether to write out pre-windows variants file.\t\t(default: {writeVariants})\n'+
+        '  --writeWindows\tWhether to write out windows stats file.\t\t(default: {writeWindows})\n'+
+        '  --windowSize\t\tWindow size.\t\t\t\t\t\t(default: {windowSize})\n'+
+        '  --windowStep\t\tWindow step.\t\t\t\t\t\t(default: {windowStep})\n'+
+        '  --doAnnotation\tWhether to annotate the final output.\t\t\t(default: {doAnnotation})\n'+
+        '  --includeReads\tWhether to include median read counts.\t\t\t(default: {IncludeReads})\n'+
+        '  --moreQuality\t\tWhether to include PE count, SR count and median MAPQ.\t(default: {MoreQual})\n'+
+        '  --suppressWarnings\tWhether to silence warning messages (not errors).\t(default: {suppressWarnings})\n'+
+        '  --filterGaps\t\tWhether to remove variants overlapping known gaps.\t(default: {filterGaps})\n'+
         '  --gapsFile\t\tReference csv with gap chromosome, start and ends.\n'+
-        '  --writeSamples\tWhether to write out sample IDs with each variant.\t(default:{writeSamples})\n'+
-        '  --mergeChr\t\tMerge per-chromosome files into one file.\t\t(default:{mergeChr})\n'+
-        '  --doFst\t\tWhether to calculate Fst values for sub-populations.\t(default:{doFst})\n'+
-        '  --calcScore\t\tWhether to include SVPop per-variant scoring.\t\t(default:{calcScore})\n'+
-        '\n Numerical Variables\n'+
-        '  --windowSize\t\tWindow size.\t\t\t\t\t\t(default:{windowSize})\n'+
-        '  --windowStep\t\tWindow step.\t\t\t\t\t\t(default:{windowStep})\n'+
+        '  --writeSamples\tWhether to write out sample IDs with each variant.\t(default: {writeSamples})\n'+
+        '  --mergeChr\t\tMerge per-chromosome files into one file.\t\t(default: {mergeChr})\n'+
+        '  --doFst\t\tWhether to calculate Fst values for sub-populations.\t(default: {doFst})\n'+
         '\n Filtering Options\n'+
-        '  --doFiltering\t\tApply filtering step prior to output.\t\t\t(default:{doFiltering})\n'+
-        '  --minLength\t\tMinimum length of structural variants.\t\t\t(default:{minLength})\n'+
-        '  --maxLength\t\tMaximum length of structural variants.\t\t\t(default:{maxLength})\n'+
-        '  --minimumQuality\tMinimum threshold for Quality column.\t\t\t(default:{minimumQuality})\n'+
-        '  --minimumPrecision\tMinimum threshold for Precision column.\t\t\t(default:{minimumPrecision})\n'+
-        '  --maximumPercRef\tMaximum threshold for perc homozygous reference.\t(default:{maximumPercRef})\n'+
-        '  --maximumPercHet\tMaximum threshold for perc heterozygous.\t\t(default:{maximumPercHet})\n'+
-        '  --minimumPercAlt\tMinimum threshold for perc homozygous alternative.\t(default:{minimumPercAlt})\n'+
-        '  --maximumPercMissing\tMaximum threshold for perc homozygous missing.\t\t(default:{maximumPercMissing})\n'+
-        '  --removeIntergenic\tWhether to remove purely intergenic variants.\t\t(default:{removeIntergenic})\n'+
-        '  --excludeDupPercHet\tWhether to exclude dups from PercHet filter.\t\t(default:{excludeDupPercHet})\n'+
-        '  --minimumPE\t\tMinimum supporting paired reads per-sample per-variant.\t(default:{minimumPE})\n'+
-        '  --minimumSR\t\tMinimum supporting split reads per-sample per-variant.\t(default:{minimumSR})\n'+
-        '  --minimumMAPQ\t\tMinimum median mapping quality per-sample per-variant.\t(default:{minimumMAPQ})\n'+
-        '  --filterScore\t\tMinimum required score, under which to filter variants.\t(default:{filterScore})\n'+
+        '  --doFiltering\t\tApply filtering step prior to output.\t\t\t(default: {doFiltering})\n'+
+        '  --minLength\t\tMinimum length of structural variants.\t\t\t(default: {minLength})\n'+
+        '  --maxLength\t\tMaximum length of structural variants.\t\t\t(default: {maxLength})\n'+
+        '  --minimumQuality\tMinimum threshold for Quality column.\t\t\t(default: {minimumQuality})\n'+
+        '  --minimumPrecision\tMinimum threshold for Precision column.\t\t\t(default: {minimumPrecision})\n'+
+        '  --maximumPercRef\tMaximum threshold for perc homozygous reference.\t(default: {maximumPercRef})\n'+
+        '  --maximumPercHet\tMaximum threshold for perc heterozygous.\t\t(default: {maximumPercHet})\n'+
+        '  --minimumPercAlt\tMinimum threshold for perc homozygous alternative.\t(default: {minimumPercAlt})\n'+
+        '  --maximumPercMissing\tMaximum threshold for perc homozygous missing.\t\t(default: {maximumPercMissing})\n'+
+        '  --removeIntergenic\tWhether to remove purely intergenic variants.\t\t(default: {removeIntergenic})\n'+
+        '  --excludeDupPercHet\tWhether to exclude DUPs from PercHet filter.\t\t(default: {excludeDupPercHet})\n'+
+        '  --minimumPE\t\tMinimum supporting paired reads per-sample per-variant.\t(default: {minimumPE})\n'+
+        '  --minimumSR\t\tMinimum supporting split reads per-sample per-variant.\t(default: {minimumSR})\n'+
+        '  --minimumMAPQ\t\tMinimum median mapping quality per-sample per-variant.\t(default: {minimumMAPQ})\n'+
+        # '  --filterScore\t\tMinimum required score, under which to filter variants.\t(default: {filterScore})\n'+
         '\n Verification by Concordance\n'+
-        '  --filterConcordance\tWhether to filter variants by concordance.\t\t(default:{filterConcordance})\n'+
-        '  --dirConcordance\tPath to directory containing secondary variant files.\t(default:{dirConcordance})\n'+
-        '  --overlapConcordance\tProportion of overlap required for verification.\t(default:{overlapConcordance})\n'+
-        '  --percConcordance\tPercentage of concordance required per-variants.\t(default:{percConcordance})\n'+
+        '  --filterConcordance\tWhether to filter variants by concordance.\t\t(default: {filterConcordance})\n'+
+        '  --dirConcordance\tPath to directory containing secondary variant files.\t(default: {dirConcordance})\n'+
+        '  --overlapConcordance\tProportion of overlap required for verification.\t(default: {overlapConcordance})\n'+
+        '  --percConcordance\tPercentage of concordance required per-variants.\t(default: {percConcordance})\n'+
         '\n Multi-Processing\n'+
-        '  --multithread\t\tWhether to split analysis over multiple cores.\t\t(default:{multithread})\n'+
-        '  --threads\t\tNumber of cores to utilise when multi-processing.\t(default:{threads})\n'+
+        '  --multithread\t\tWhether to split analysis over multiple cores.\t\t(default: {multithread})\n'+
+        '  --threads\t\tNumber of cores to utilise when multi-processing.\t(default: {threads})\n'+
         '\n Misc. Options\n'+
         '  --help, -h\t\tDisplay this information.\n'+
         '  --version, -v\t\tDisplay full version information.\n'+
@@ -192,7 +187,9 @@ if __name__ == "__main__":
         '  --MERGE-MODEL\t\tMerge by-model variants files into one file.\n'+
         '  --SUBSET\t\tCreate a subset of a given variant or window file.\n'+
         '  --STATS\t\tProduce summary statistics for a variant or window files.\n'+
-        '  --PREPROCESS\t\tProcess analysis output files for visualisation.{colReset}\n').format(**globals()),flush=True)
+        '  --PREPROCESS\t\tProcess analysis output files for visualisation.\n'+
+        '\n'+
+        '\tAdditional information can be found on the SV-Pop wiki.{colReset}\n').format(**globals()),flush=True)
         #'  --REGION-SP\t\t[Not Implemented] Convert a variant output file to a Specific-Position encoded sample-oriented file.\n'+
         #'  --REGION-GE\t\t[Not Implemented] Convert a variant output file to a Gene-Encountered encoded sample-oriented file.\n'+
         sys.exit()
@@ -204,11 +201,11 @@ if __name__ == "__main__":
         '  --variantFile\t\tPath for variant file being converted.\n'+
         '  --refFile, -R\t\tAnnotation reference file. (gtf,gff,csv,tsv)\t\t(if doAnnotation is True)\n'+ # Must be formatted with four columns (Chromosome, Start, End, Gene)
         '\n Optional Arguments\n'+
-        "  --subPops, -P\t\tTab-seperated file with 'Samples' and sub-pop columns.\n"+
-        '  --outFile, -O\t\tOutput file name (shared for all outputs).\t\t(default:{outFile})\n'+
-        '  --doAnnotation\tWhether to annotate the final output.\t\t\t(default:{doAnnotation})\n'+
-        '  --windowSize\t\tWindow size.\t\t\t\t\t\t(default:{windowSize})\n'+
-        '  --windowStep\t\tWindow step.\t\t\t\t\t\t(default:{windowStep}){colReset}\n').format(**globals()),flush=True)
+        "  --subPops, -P\t\tTab-separated file with 'Samples' and sub-pop columns.\n"+
+        '  --outFile, -O\t\tOutput file name (shared for all outputs).\t\t(default: {outFile})\n'+
+        '  --doAnnotation\tWhether to annotate the final output.\t\t\t(default: {doAnnotation})\n'+
+        '  --windowSize\t\tWindow size.\t\t\t\t\t\t(default: {windowSize})\n'+
+        '  --windowStep\t\tWindow step.\t\t\t\t\t\t(default: {windowStep}){colReset}\n').format(**globals()),flush=True)
         sys.exit()
     elif len(sys.argv) == 2 and ('--MERGE-CHR' in sys.argv): # MERGE specific help
         print(('{colHelp} [--MERGE-CHR] Merge Chromosome-Specific Variant or Window Files Together\n\n'+
@@ -218,7 +215,7 @@ if __name__ == "__main__":
         '     Nb. Specifying "<MODEL>v" or "<MODEL>w" will pull all current directory variant or windows files of that model.\n'+
         '  --model, -M\t\tDELLY model. (DUP,DEL,INS,INV). Inferred if missing.\n'+
         '\n Optional Arguments\n'+
-        "  --outFile, -O\t\tOutput file name (shared for all outputs).\t\t(default:'Merged'){colReset}\n").format(**globals()),flush=True)
+        "  --outFile, -O\t\tOutput file name (shared for all outputs).\t\t(default: 'Merged'){colReset}\n").format(**globals()),flush=True)
         sys.exit()
     elif len(sys.argv) == 2 and ('--MERGE-MODEL' in sys.argv): # MERGE specific help
         print(('{colHelp} [--MERGE-MODEL] Merge Model-Specific Variant or Window Files Together\n\n'+
@@ -229,7 +226,7 @@ if __name__ == "__main__":
         '  --model, -M\t\tDELLY model. (DUP,DEL,INS,INV). Inferred if missing.\n'+
         '  --chr\t\t\tSpecify chromosome of files, used for output file name.\n'+
         '\n Optional Arguments\n'+
-        "  --outFile, -O\t\tOutput file name (shared for all outputs).\t\t(default:'Merged'){colReset}\n").format(**globals()),flush=True)
+        "  --outFile, -O\t\tOutput file name (shared for all outputs).\t\t(default: 'Merged'){colReset}\n").format(**globals()),flush=True)
         sys.exit()
     elif len(sys.argv) == 2 and ('--FILTER' in sys.argv): # FILTER specific help
         print(('{colHelp} [--FILTER] Filter Variant Files By Quality, Precision & Inferred Genotype Scores.\n\n'+
@@ -238,16 +235,16 @@ if __name__ == "__main__":
         '  --variantFile\t\tPath for variant file being filtered.\n'+
         '  --model, -M\t\tDELLY model. (DUP,DEL,INS,INV). Inferred if missing.\n'+
         '\n Optional Arguments\n'+
-        "  --outFile, -O\t\tOutput file name (shared for all outputs).\t\t(default:'Filtered')\n"+
+        "  --outFile, -O\t\tOutput file name (shared for all outputs).\t\t(default: 'Filtered')\n"+
         '\n Filtering Parameters\n'+
-        '  --minimumQuality\tMinimum threshold for Quality column.\t\t\t(default:{minimumQuality})\n'+
-        '  --minimumPrecision\tMinimum threshold for Precision column.\t\t\t(default:{minimumPrecision})\n'+
-        '  --maximumPercRef\tMaximum threshold for perc homozygous reference.\t(default:{maximumPercRef})\n'+
-        '  --maximumPercHet\tMaximum threshold for perc heterozygous.\t\t(default:{maximumPercHet})\n'+
-        '  --minimumPercAlt\tMinimum threshold for perc homozygous alternative.\t(default:{minimumPercAlt})\n'+
-        '  --maximumPercMissing\tMaximum threshold for perc homozygous missing.\t\t(default:{maximumPercMissing})\n'+
-        '  --removeIntergenic\tWhether to remove purely intergenic variants.\t\t(default:{removeIntergenic})\n'+
-        '  --percConcordance\tPercentage concordance required per variant.\t\t(default:{percConcordance}){colReset}\n').format(**globals()),flush=True)
+        '  --minimumQuality\tMinimum threshold for Quality column.\t\t\t(default: {minimumQuality})\n'+
+        '  --minimumPrecision\tMinimum threshold for Precision column.\t\t\t(default: {minimumPrecision})\n'+
+        '  --maximumPercRef\tMaximum threshold for perc homozygous reference.\t(default: {maximumPercRef})\n'+
+        '  --maximumPercHet\tMaximum threshold for perc heterozygous.\t\t(default: {maximumPercHet})\n'+
+        '  --minimumPercAlt\tMinimum threshold for perc homozygous alternative.\t(default: {minimumPercAlt})\n'+
+        '  --maximumPercMissing\tMaximum threshold for perc homozygous missing.\t\t(default: {maximumPercMissing})\n'+
+        '  --removeIntergenic\tWhether to remove purely intergenic variants.\t\t(default: {removeIntergenic})\n'+
+        '  --percConcordance\tPercentage concordance required per variant.\t\t(default: {percConcordance}){colReset}\n').format(**globals()),flush=True)
         sys.exit()
     elif len(sys.argv) == 2 and ('--SUBSET' in sys.argv): # MERGE specific help
         print(('{colHelp} [--SUBSET] Create a subset of a given variant or window file.\n\n'+
@@ -257,8 +254,8 @@ if __name__ == "__main__":
         '  --feature\t\tID or name of gene, ie. a gene. which to subset to.\n'+
         "  --region\t\tRegion to subset to, formatted as 'chromosome:basepairA-basepairB'.\n"+
         '\n Optional Arguments\n'+
-        "  --statsOnly\t\tSkip writing the subset to file, returning only stats.\t(default:{statsOnly})\n"+
-        "  --outFile, -O\t\tOutput file name (shared for all outputs).\t\t(default:'Subset'){colReset}\n").format(**globals()),flush=True)
+        "  --statsOnly\t\tSkip writing the subset to file, returning only stats.\t(default: {statsOnly})\n"+
+        "  --outFile, -O\t\tOutput file name (shared for all outputs).\t\t(default: 'Subset'){colReset}\n").format(**globals()),flush=True)
         sys.exit()
     elif len(sys.argv) == 2 and ('--PREPROCESS' in sys.argv):
         print(('{colHelp} [--PREPROCESS] Process analysis output files to transition to visualisation.\n\n'+
@@ -302,8 +299,8 @@ if len(set(startArgs)) < len(startArgs):
 #         f.write('{0},{1},{2},{3}\n'.format(ctime,cpu,memory,info))
 
 # Time checker
-def printT(message, flush=True, file=sys.stdout):
-    print(datetime.datetime.now().strftime('{colTime}[%d-%b-%Y %H:%M:%S]{colReset} '.format(**globals())+message),flush=flush, file=file)
+def printT(message, flush=False, file=sys.stdout):
+    print(datetime.datetime.now().strftime('{colTime}[%d-%b-%Y %H:%M:%S]{colReset} '.format(**globals())+message), flush=flush, file=file)
 
 # Write-over time checker, override if multiprocessing.
 if not multithread:
@@ -485,7 +482,7 @@ for arg in args:
         multithread = checkArg(arg,'--multithread',True)
     elif arg.startswith('--threads'):
         threads = int(checkArg(arg,'--threads'))
-    elif arg.startswith('--includeReads'):
+    elif arg.startswith('--moreQuality'):
         MoreQual = checkArg(arg,'--moreQuality',True)
     elif arg.startswith('--minimumPE'):
         minimumPE = float(checkArg(arg,'--minimumPE'))
@@ -493,14 +490,8 @@ for arg in args:
         minimumSR = float(checkArg(arg,'--minimumSR'))
     elif arg.startswith('--minimumMAPQ'):
         minimumMAPQ = float(checkArg(arg,'--minimumMAPQ'))
-    elif arg.startswith('--calcScore'):
-        calcScore = checkArg(arg,'--calcScore',True)
-        if calcScore:
-            filterConcordance = True
-            MoreQual = True
-            IncludeReads = True
-    elif arg.startswith('--filterScore'):
-        filterScore = float(checkArg(arg,'--filterScore'))
+    elif arg.startswith('--doFst'):
+        doFst = checkArg(arg,'--doFst',True)
     elif arg.startswith('--noCols'):
         pass
     elif arg.startswith('--statsOnly'):
@@ -568,7 +559,7 @@ def doWriteWindows(outDat, windowStep=windowStep, doAnnotation=doAnnotation, Ref
                 colName = popType+'_'+pop
                 SubPopFreqs[colName] = popFreqs
                 SubPopCols.append(colName)
-            if not multithread: print('')
+#            if not multithread: print('')
 
     if subPops != '':
         for pop in SubPopCols: # add subPop frequencies to outDat
@@ -769,7 +760,7 @@ def doMergeVariants(variantFiles, model=MODEL,cleanup=True):
         sys.exit()
 
     printT('Reading in variant files.')
-    Merged = pd.concat([pd.read_csv(i,low_memory=False) for i in fileNames])
+    Merged = pd.concat([pd.read_csv(i) for i in fileNames])
     if 'variants' in fileNames[0]:
         if not suppressWarnings:
             print('{colWarn}Warning: Inferring files as variant files.{colReset}'.format(**globals()), flush=True)
@@ -786,7 +777,7 @@ def doMergeVariants(variantFiles, model=MODEL,cleanup=True):
     printT('Sorting merged file by Chromosome then Start position')
     Merged = Merged.sort_values(by=['Chromosome','Start'])
     printT('Writing merged file to {0}.'.format(outputName))
-    Merged.to_csv(outputName,index=False)
+    Merged.to_csv(outputName, index=False)
     if cleanup:
         printT('Removing per-chromosome files.')
         for f in fileNames:
@@ -944,6 +935,14 @@ def prepForVisualisation(filePrefix):
         VariantsName  = '{0}/{1}_Variants.csv'.format(outDirName, model)
         WindowsName   = '{0}/{1}_Windows.csv'.format(outDirName, model)
 
+        # Check files are present, skip and alert if not
+        if not os.path.isfile(varFile):
+            printT("Variant file '{}' not found, skipping {}.".format(varFile, model))
+            continue
+        elif not os.path.isfile(varFile):
+            printT("Window file '{}' not found, skipping {}.".format(varFile, model))
+            continue
+
         printT('Reading in variant and window files.')
         variants = pd.read_csv(varFile)
         windows  = pd.read_csv(winFile)
@@ -989,6 +988,7 @@ def analyseChr(chrChunk):
         skippedCount = 0
         num = 0
         hNames = ['Chromosome','Start','Name','X','Type','X2','Quality','Info','Format','Details']
+        samplesRefined = samples.copy()
         for SampleID in samples:
             # Processing count
             num += 1
@@ -1020,7 +1020,7 @@ def analyseChr(chrChunk):
                     # Clean to vitals
                     dat = dat.assign(End=dat.Info.str.partition(';END=')[2].str.partition(';')[0])
                     dat = dat.assign(Precision=dat.Info.str.partition(';')[0])
-                    dat = dat.assign(Samples=SampleID.partition('.')[0].split('/')[-1]) # remove file suffix and directories
+                    dat = dat.assign(Samples=SampleID.split('.')[-2].split('/')[-1]) # remove file suffix and directories, nb. lack of . or / may break this...
 
                     # Pull raw read counts
                     if IncludeReads:
@@ -1055,10 +1055,11 @@ def analyseChr(chrChunk):
                         simpleLog(chrChunk, SampleID.partition('.')[0].split('/')[-1], belowMAPQ, 'SubParMAPQ', 'minimumMAPQ_{0}_{1}'.format(MODEL, chrChunk))
 
                     # Filter out variants not present in secondary discovery method
-                    if filterConcordance and MODEL in ['DEL','DUP']:
+                    if filterConcordance: # and MODEL in ['DEL','DUP','INV']:
                         # Read in concordance dataset and subset to relevant SV type
                         refConcord = pd.read_csv(dirConcordance+SampleID.lstrip('.').partition('.')[0].split('/')[-1]+'.cnvs')
-                        refConcord = refConcord[refConcord['Type'] == 'DEL'] if MODEL == 'DEL' else refConcord[refConcord['Type'] == 'DUP']
+                        refConcord = refConcord[refConcord['Type'] == MODEL] #refConcord[refConcord['Type'] == 'DEL'] if MODEL == 'DEL' else refConcord[refConcord['Type'] == 'DUP']
+                        refConcord = refConcord[refConcord['Chromosome'] == chrChunk]
 
                         concordanceLog = []
                         if not refConcord.shape[0] == 0:
@@ -1145,7 +1146,7 @@ def analyseChr(chrChunk):
                         print('Warning: No concordance file present for "{0}".'.format(SampleID), flush=True, file=f)
                 skippedCount += 1
                 skippedFiles.append(SampleID+' (All)')
-                samples.remove(SampleID)    # Re-align frequency as percentage of samples parsed, not samples given
+                samplesRefined.remove(SampleID)
             gc.collect()
 
         # Informing user regarding missed files.
@@ -1224,18 +1225,17 @@ def analyseChr(chrChunk):
 
             # Filter out variants which overlap with assembly gaps
             if filterGaps:
-                printT('Filtering out variants which cover known assembly gaps.', file=f)
+                printT('Filtering out variants that cover known assembly gaps.', file=f)
                 gapsChunk = gaps.loc[gaps.Chromosome.astype(str) == chrChunk]
-                gapVariantCount = 0
+                gapVariants = []
                 for row in gapsChunk.itertuples():
-                    tmp = outDat.loc[outDat.Start.astype(int) <= int(row[3])].loc[outDat.End.astype(int) >= int(row[2])].index
-                    gapVariantCount += len(tmp)
-                    # if gapVariantCount > 0:
-                    #     gapOverlapFile = 'gapOverlap_'+chrChunk'.txt'
-                    #     printT('Writing gap overlap variants to {0}.'.format(gapOverlapFile))
-                    #     outDat.iloc[tmp].to_csv(gapOverlapFile)
-                    outDat.drop(list(tmp),inplace=True)
-                printT('{0:,} variants removed from chromosome {1} due to assembly gap overlap.'.format(gapVariantCount,chrChunk), file=f)
+                    gapVariants.extend(outDat.loc[outDat.Start.astype(int) <= int(row[3])].loc[outDat.End.astype(int) >= int(row[2])].index.tolist())
+                if len(gapVariants) > 0:
+                    gapOverlapFile = 'gapOverlap_{}_{}.log'.format(MODEL, chrChunk)
+                    printT('Writing gap overlap variants to {0}.'.format(gapOverlapFile))
+                    outDat.iloc[gapVariants].to_csv(gapOverlapFile, index=False)
+                outDat.drop(gapVariants, inplace=True)
+                printT('{0:,} variants removed from chromosome {1} due to assembly gap overlap.'.format(len(gapVariants),chrChunk), file=f)
 
             outDat = outDat.sort_values(by=['Chromosome','Start']) # Sort by start position
 
@@ -1258,7 +1258,7 @@ def analyseChr(chrChunk):
                 precisionCell = row[(list(outDat.columns).index('Precision')+1)].split(',')
 
                 SampleCount.append(len(sampleCell))
-                SampleFrequency.append(len(sampleCell)/len(samples))                        # Use for grabbing subPop frequencies
+                SampleFrequency.append(len(sampleCell)/len(samples)-skippedCount)           # Use for grabbing subPop frequencies
                 QualityCount.append(qualityCell.count('PASS')/len(qualityCell))             # Quality as percentage 'PASS'
                 PrecisionCount.append(precisionCell.count('PRECISE')/len(precisionCell))    # Precision as percentage 'PRECISE'
 
@@ -1327,7 +1327,7 @@ def analyseChr(chrChunk):
                         colName = popType+'_'+pop
                         SubPopFreqs[colName] = popFreqs
                         SubPopCols.append(colName)
-                    if not multithread: print('')
+#                    if not multithread: print('')
 
             outDat['Count'] = SampleCount
             outDat['Frequency'] = SampleFrequency
@@ -1375,7 +1375,7 @@ def analyseChr(chrChunk):
             if underMinLength > 0:
                 underMinFile = 'underMinLength_{0}_{1}.log'.format(MODEL,chrChunk)
                 printT('Writing underMinLength variants to {0}.'.format(underMinFile), file=f)
-                outDat.loc[outDat.Length <= minLength].to_csv(underMinFile)   # indicated by minLength variable
+                outDat.loc[outDat.Length <= minLength].to_csv(underMinFile, index=False)   # indicated by minLength variable
                 outDat = minCheck
 
             # Remove super-long variants
@@ -1386,7 +1386,7 @@ def analyseChr(chrChunk):
             if overMaxLength > 0:
                 overMaxFile = 'overMaxLength_{0}_{1}.log'.format(MODEL,chrChunk)
                 printT('Writing overMaxLength variants to {0}.'.format(overMaxFile), file=f)
-                outDat.loc[outDat.Length >= maxLength].to_csv(overMaxFile)   # indicated by maxLength variable
+                outDat.loc[outDat.Length >= maxLength].to_csv(overMaxFile, index=False)   # indicated by maxLength variable
                 outDat = maxCheck
 
             # Filtering step if not removing intergenic (faster, as we only annotate post-filter variants)
@@ -1407,7 +1407,7 @@ def analyseChr(chrChunk):
                         printR('Annotating variant {0:,} of {1:,}.'.format(count,outDat.shape[0]), file=f)
                 outDat['Feature'] = annots                
             if not writeSamples:
-                outDat.drop('Samples',axis=1).to_csv(fileName,index=False)
+                outDat.drop('Samples',axis=1).to_csv(fileName, index=False)
 
             # Filtering step if removing intergenic (slower, as we need to annotation all variants)
             if doFiltering and removeIntergenic:
@@ -1415,33 +1415,6 @@ def analyseChr(chrChunk):
                     maximumPercRef=maximumPercRef, maximumPercHet=maximumPercHet, minimumPercAlt=minimumPercAlt,
                     maximumPercMissing=maximumPercMissing, removeIntergenic=removeIntergenic, filterConcordance=filterConcordance,
                     percConcordance=percConcordance, internalFunc=True, logFile=f)
-
-            # Calculate SVPop scores for each variant, filter if requested
-            if calcScore:
-                reqColumns = ['Concordance', 'PercAlt', 'PercHet', 'SR', 'Frequency']
-                reqCheck = list(compress(reqColumns,[x not in outDat.columns for x in reqColumns]))
-                if len(reqCheck) > 0:
-                    printT('Unable to calculate score due to missing columns: {0}'.format(reqCheck), file=f)
-                else:
-                    # Calculate score components
-                    outDat['Score_Calls'] = outDat['PercAlt'] + (outDat['PercHet'] * 0.5)
-                    outDat['Score_MapQ'] = (outDat['MapQual'] / 60)
-                    outDat['Score_SR'] = (outDat['SR'] / 10)
-
-                    # Calculate score - the key bit
-                    outDat['Score'] = (outDat['Score_Calls'] + outDat['Score_MapQ'] + outDat['Score_SR'] + outDat['Frequency'] + outDat['Concordance']) / 5
-
-                    # Filter by score if required
-                    if filterScore > 0 and filterScore < 1: # Nb. filterScore as False evaluates numerically as 0, so this defaults to False
-                        foreLength = outDat.shape[0]
-                        scoreCheck = outDat.loc[outDat.Score >= filterScore]
-                        poorScore = foreLength - scoreCheck.shape[0]
-                        printT('{0:,} variants removed from chromosome {1} due to insufficient score.'.format(poorScore,chrChunk), file=f)
-                        if poorScore > 0:
-                            outDat = outDat[outDat.Score < filterScore]
-
-                    # Remove component columns
-                    outDat.drop(['Score_Calls','Score_MapQ','Score_SR'],axis=1,inplace=True)
 
             # Writing variant files out
             if writeVariants:
@@ -1560,7 +1533,7 @@ def prepAnnotation(RefFile, refFormat, refType, refTypeID, refCol):
             return pd.read_csv(RefFile,comment='#',names=['Chromosome','Start','End','Feature'],dtype={'Chromosome':str,'Start':int,'End':int,'Feature':str},header=0,low_memory=False)
         elif RefFile.endswith('.tsv') or refFormat.upper() == 'TSV':
             printT('Reading in annotation reference as a tab-delimited file.')
-            return pd.read_table(RefFile,comment='#',sep='\t',names=['Chromosome','Start','End','Feature'],dtype={'Chromosome':str,'Start':int,'End':int,'Feature':str},header=1)
+            return pd.read_table(RefFile,comment='#',sep='\t',names=['Chromosome','Start','End','Feature'],dtype={'Chromosome':str,'Start':int,'End':int,'Feature':str},header=0)
         else:
             print('{colError}Error: Reference format type "'+refFormat+'" not recognised (Must be gtf, gff, csv or tsv).{colReset}\n'.format(**globals()),flush=True)
             sys.exit()
@@ -1716,7 +1689,7 @@ else:
                 printT('Too few ({0}) per-chromosome windows to merge.'.format(len(windows)))
         printT('{colTitle}Merge complete.{colReset}\n'.format(**globals()))
 
-    # Brush log files under the carpet
+    # Brush log files into sub-folder
     if not os.path.exists('./SVPop_Logs'):
         os.makedirs('./SVPop_Logs')
     os.system('mv *{0}*.log ./SVPop_Logs'.format(MODEL))

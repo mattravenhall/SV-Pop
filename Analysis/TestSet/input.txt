@@ -1,0 +1,8 @@
+./ExampleVCFs/sample001_DEL.vcf
+./ExampleVCFs/sample002_DEL.vcf
+./ExampleVCFs/sample003_DEL.vcf
+./ExampleVCFs/sample004_DEL.vcf
+./ExampleVCFs/sample005_DEL.vcf
+./ExampleVCFs/sample006_DEL.vcf
+./ExampleVCFs/sample007_DEL.vcf
+./ExampleVCFs/sample008_DEL.vcf

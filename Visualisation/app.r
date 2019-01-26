@@ -1,30 +1,60 @@
 library(shiny)
 
-# Load window frequency files
-DEL <- as.data.frame(fread('Files/DEL_Windows.csv',sep=','))
-DUP <- as.data.frame(fread('Files/DUP_Windows.csv',sep=','))
-INS <- as.data.frame(fread('Files/INS_Windows.csv',sep=','))
-INV <- as.data.frame(fread('Files/INV_Windows.csv',sep=','))
+models <- c('Deletions','Duplications','Insertions','Inversions')
+names(models) <- c('DEL','DUP','INS','INV')
 
-# Annotation File 
-annot <- as.data.frame(fread('Files/annotation.txt',header=T))
+# Check which SV models are present
+missingModel <- c()
+for (model in names(models)) {
+  if (!file.exists(paste('Files/',model,'_Variants.csv',sep=''))) {
+    print(paste('Warning: Variant file for',model,'not found, skipping SV type.',sep=' '))
+    missingModel <- c(missingModel, model)
+  } else if (!file.exists(paste('Files/',model,'_Windows.csv',sep=''))) {
+    print(paste('Warning: Windows file for',model,'not found, skipping SV type.',sep=' '))
+    missingModel <- c(missingModel, model)
+  } else if (!file.exists(paste('Files/',model,'_AllIndex.csv',sep=''))) {
+    print(paste('Warning: Full Index file for',model,'not found, skipping SV type.',sep=' '))
+    missingModel <- c(missingModel, model)
+  } else if (!file.exists(paste('Files/',model,'_FrqIndex.csv',sep=''))) {
+    print(paste('Warning: Frequent Index file for',model,'not found, skipping SV type.',sep=' '))
+    missingModel <- c(missingModel, model)
+  } 
+}
+print(missingModel)
+if (length(missingModel) == length(names(models))) {
+  print('Error: Missing files for all models.')
+  quit()
+} else {
+  models <- models[!(names(models) %in% missingModel)]
+}
 
-# Frequent specific variants files
-DELf <- as.data.frame(fread('Files/DEL_FrqIndex.csv',sep=','))
-DUPf <- as.data.frame(fread('Files/DUP_FrqIndex.csv',sep=','))
-INSf <- as.data.frame(fread('Files/INS_FrqIndex.csv',sep=','))
-INVf <- as.data.frame(fread('Files/INV_FrqIndex.csv',sep=','))
+# Annotation File, if it exists
+if (!file.exists('Files/annotation.txt')) {
+  print('Error: Annotation file missing.')
+  quit()
+} else {
+  annot <- as.data.frame(fread('Files/annotation.txt',header=T))   
+}
 
-# Full variant files
-DELv <- as.data.frame(fread('Files/DEL_AllIndex.csv',sep=','))
-DUPv <- as.data.frame(fread('Files/DUP_AllIndex.csv',sep=','))
-INSv <- as.data.frame(fread('Files/INS_AllIndex.csv',sep=','))
-INVv <- as.data.frame(fread('Files/INV_AllIndex.csv',sep=','))
+# Load files for each model
+for (model in names(models)) {
+  assign(model, as.data.frame(fread(paste('Files/',model,'_Windows.csv',sep=''),sep=',')))
+  assign(paste(model,'f',sep=''), as.data.frame(fread(paste('Files/',model,'_FrqIndex.csv',sep=''),sep=',')))
+  assign(paste(model,'v',sep=''), as.data.frame(fread(paste('Files/',model,'_AllIndex.csv',sep=''),sep=',')))
+  }
 
 # Define UI for application that draws a histogram
-VARs <- rbind(rbind(rbind(DEL, DUP),INS),INV)
-
-annot <- as.data.frame(fread('Files/annotation.txt',header=T))
+if (length(models) == 1) {
+  VARs <- get(names(models[1]))
+} else if (length(models) >= 2) {
+  for (model in names(models)[2:length(names(models))]) {
+    if (model == names(models[2])) {
+      VARs <- rbind(get(names(models)[1]), get(names(models)[2]))
+    } else {
+      VARs <- rbind(VARS, get(model))
+    }
+  }
+}
 
 chrs = list()
 for (i in unique(VARs$Chromosome)) { chrs[i] = i }
@@ -50,7 +80,7 @@ ui <- fluidPage(
       ),
       column(3,
         wellPanel(style="border: 1px solid grey;", #background-color: #d1d1d1;
-          selectInput('Model', label='Variant Type:', choices=list('Deletions'='DEL', 'Duplications'='DUP','Insertions'='INS','Inversion'='INV')),
+          selectInput('Model', label='Variant Type:', choices=lapply(split(names(models), models), unname)),
           selectInput('Chromosome', label='Chromosome:', choices=chrs, selected=chrs[1]),
           selectInput('PlotType', label='Plot Type:', choices=list('Bars'='h','Points'='b'), selected='h')
           )
@@ -71,8 +101,8 @@ ui <- fluidPage(
       column(3,
         wellPanel(style="border: 1px solid grey;", #background-color: #d1d1d1;
           helpText(HTML("<strong>SV-Pop</strong> is a tool for visualising population-wide structural variation.")),
-          helpText(HTML("You can find the upstream analysis pipeline on <a href='https://github.com/mattravenhall/SV-Pop'>github</a>.")),
-          helpText(HTML("If used, please cite: <strong>Ravenhall M et al. 2018. doi:XXXXXX.</strong>"))
+          helpText(HTML("You can find the upstream analysis pipeline, and further documentation, on <a href='https://github.com/mattravenhall/SV-Pop' target='_blank'>github</a>."))
+          # , helpText(HTML("If used, please cite: <strong>Ravenhall M et al. doi:XXXXXX.</strong>"))
         )
       )
     )
@@ -81,21 +111,20 @@ ui <- fluidPage(
     column(12,
       wellPanel(style="border: 1px solid grey;",
         helpText(HTML("<strong>What is SV-Pop?</strong>")),
-        helpText(HTML("<strong>SV-Pop</strong> is a visualisation tool designed for efficient analysis of population-wide structural variation. The source code for this project is available on <a href='https://github.com/mattravenhall/SV-Pop'>github</a>, alongside the associated analysis pipeline. Combined these provide an effective, high-throughput pipeline for structural variant discovery.")),
-        helpText(HTML("Each plot consists of variant frequency within genomic windows, centred upon a given position. Sub-populations are pulled from the user-specified files. Further information is present within the associated publication: <a href='https://www.google.co.uk'><strong>Ravenhall M <I>et al.</I> 2018. doi: XXXXXXXX</strong></a>")),
+        helpText(HTML("<strong>SV-Pop</strong> is a visualisation tool designed for efficient analysis of population-wide structural variation. The source code for this project is available on <a href='https://github.com/mattravenhall/SV-Pop' target='_blank'>github</a>, alongside the associated analysis pipeline. Combined, these provide an effective, high-throughput pipeline for structural variant discovery. Each plot consists of variant frequency within genomic windows, as presented in the standard SV-Pop windows format. Sub-populations are pulled from the user-provided files.")),
         helpText(HTML("<br>")),
         helpText(HTML("<strong>How do I customise plots?</strong>")),
-        helpText(HTML("Our underlying data considers four types of structural variants (deletions, duplications, insertions and inversions) within the fourteen <I>P. falciparum</I> chromosomes, apicoplast and mitochondria are currently excluded. As such the first control panel concerns selection of these different variant types and chromosomes. Also featured is the ability to select 'Bars' or 'Points' plotting style. By default, this is set to 'Bars', but extended visualisation of specific regions may benefit from the clarify of the 'Points' style.")),
+        helpText(HTML("Visualised data considers of up to four types of structural variants (deletions, duplications, insertions and inversions) within any number of chromosomes. As such the first control panel concerns selection of these different variant types and chromosomes. Also featured is the ability to select 'Bars' or 'Points' plotting style. By default, this is set to 'Bars', but extended visualisation of specific regions may benefit from the clarify of the 'Points' style (particularly for data-dense regions).")),
         helpText(HTML("Continent and sub-continent specific sub-populations can be included or excluded through selection within the second control panel, whilst specific positions, frequency cut-offs and the ability to download selected regions (more on this below) are present within the third control panel. Experimentation is encouraged.")),
         helpText(HTML("<br>")),
-        helpText(HTML("<strong>Can I download variants in a region?</strong>")),
-        helpText(HTML("Specific regions can be highlighted by drawing a box with the mouse on the plotting area. Doing so will both identify genes and count variants within that region, but also allow the user to download a .csv file containing those specific variants. This can be download by pressing the 'Download Selected Variants' button within the third control panel.")),
+        helpText(HTML("<strong>Can I subset to variants in a region?</strong>")),
+        helpText(HTML("Specific regions can be highlighted by drawing a box with the mouse on the plotting area. Doing so will identify both genes and count variants within that region, but also allow the user to download a .csv file containing those specific variants. To produce this, simply click the 'Download Selected Variants' button within the third control panel.")),
         helpText(HTML("<br>")),
         helpText(HTML("<strong>Are there any working examples?</strong>")),
-        helpText(HTML("We have previously used this analysis and visualisation pipeline to investigate structural variation in <I>Plasmodium falciparum</I>, you can find that work <strong><a href='https://mattravenhall.github.io/example-page'>online XXXXXXX</a></strong>.")),
+        helpText(HTML("A test dataset is provided within the SV-Pop repo, details regarding its use can be found in the <a href='https://github.com/mattravenhall/SV-Pop/wiki/Visualisation-Expanded-Help#Running-the-Test-Set' target='_blank'>wiki</a>.")),
         helpText(HTML("<br>")),
         helpText(HTML("<strong>What if I find a bug/have a question?</strong>")),
-        helpText(HTML("Bug reports should be submitted on <a href='https://github.com/mattravenhall/SV-Pop/issues'>github</a>. Other general enquiries may be directed to <a href='mailto:matt.ravenhall@lshtm.ac.uk?Subject=SV-Pop%20Question'>matt.ravenhall@lshtm.ac.uk</a>."))
+        helpText(HTML("Bug reports should be submitted on <a href='https://github.com/mattravenhall/SV-Pop/issues' target='_blank'>github</a>. Other general enquiries may be directed to <a href='mailto:matt.ravenhall@lshtm.ac.uk?Subject=SV-Pop%20Question'>matt.ravenhall@lshtm.ac.uk</a>."))
       )
     )
   ) # Close tabPanel
@@ -123,8 +152,9 @@ server <- function(input, output) {
     }
   })
   output$info <- renderText({
-      forConversion <- c('deletions','duplications','insertions','inversions')
-      names(forConversion) <- c('DEL','DUP','INS','INV')
+      # forConversion <- c('deletions','duplications','insertions','inversions')
+      # names(forConversion) <- c('DEL','DUP','INS','INV')
+      forConversion <<- "models"
 
       xy_range_str <- function(e) {
         if (is.null(e)) return ("No Region Selected\n")

@@ -38,7 +38,7 @@ with open("requirements.txt") as f:
         installed = install_check is not None
 
         if not installed: #package not in installed_packages:
-            print("'{}' not found, please install before reattempting setup.".format(package))
+            print("Error: package '{}' not found, please install before reattempting setup.".format(package))
             sys.exit()
 
 # Set up PATH
@@ -52,4 +52,4 @@ if binary_query('Add SVPop to PATH?'):
         add2path.wait()
         os.system('bash; source ~/.bashrc')
 
-print('Set up complete.')
+print('Checks complete.')

@@ -1,7 +1,7 @@
 # SV-Pop
-_Public documentation currently in development_
+SV-Pop is designed for post-discovery SV analysis and visualisation, and therefore contains two modules for those purposes. Both modules should work out of the box, but it's a good idea to run preflightchecks.py (in Analysis/) to check that all dependencies are installed, and to optionally add SVPop to your PATH.
 
-SV-Pop is designed for post-discovery SV analysis and visualisation, and therefore has two modules for those purposes. Both modules should work out of the box, but it's a good idea to run setup.py (in Analysis/) to check that all dependencies are installed, and optionally add SVPop to your PATH.
+Extended documentation, including specifics regarding input files, is present on this repo's [wiki](https://github.com/mattravenhall/SV-Pop/wiki).
 
 <img src="https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Pipeline.png" alt="Pipeline Overview" width="400"/>
 
@@ -13,30 +13,38 @@ Quick start:
 SVPop -h
 ```
 
-- DEFAULT
-- CONVERT
-- FILTER
-- MERGE-CHR
-- MERGE-MODEL
-- SUBSET
-- STATS
-- PREPROCESS
+### Run Modes
+- `'DEFAULT'`: Collate post-discovery per-sample per-type SV files for analysis.
+- `CONVERT`: Convert a variant output file into a windows file.
+- `FILTER`: Filter a variant output file by a range of factors.
+- `MERGE-CHR`: Merge per-chromosome variants files into one file.
+- `MERGE-MODEL`: Merge by-model variants files into one file.
+- `SUBSET`: Create a subset of a given variant or window file.
+- `STATS`: Produce summary statistics for a variant or window files.
+- `PREPROCESS`: Process analysis output files for visualisation.
 
-Input > Process > Output
+Expanded help can be found on the [wiki](https://github.com/mattravenhall/SV-Pop/wiki/Analysis-Expanded-Help).
 
 ## Visualisation Module
 <img src="https://raw.githubusercontent.com/mattravenhall/SV-Pop/master/Images/Preview_Visualisation.png" alt="Preview Visualiser"/>
 
 Quick start:
 ```bash
-SVPop --PREPROCESS --variantFile=PREFIX
+SVPop --PREPROCESS --variantFile=YOUR_PREFIX
 Rscript easyRun.r
 ```
 
-- Annotation file
-- Population file
-- Variants output
-- Windows output
+### Expected Input
+The visualisation module will expect the following files in Visualisation/Files/:
+- `"model"\_Variants.csv`: Reformatted variants file.
+- `"model"\_Windows.csv`: Reformatted windows file.
+- `"model"\_AllIndex.csv`: Locations of all variants, for faster indexing.
+- `"model"\_FrqIndex.csv`: Subset of AllIndex for 'frequent' (>5%) variants only.
+- `annotation.txt`: The annotation file use for your SVPop Analysis run.
 
-## Citation
-Ravenhall M XXXXXXXXXXXXXXXX.
+These files can be created for a post-SVPop Analysis run with `SVPop --PREPROCESS --variantFile=YOUR_PREFIX`.
+
+Expanded help can be found on the [wiki](https://github.com/mattravenhall/SV-Pop/wiki/Visualisation-Expanded-Help).
+
+<!-- ## Citation
+Ravenhall M, Campino S, & Clark T. SV-Pop: Population-based structural variant analysis and visualization. _Manuscript Under Review_ -->
