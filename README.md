@@ -36,10 +36,10 @@ Rscript easyRun.r
 
 ### Expected Input
 The visualisation module will expect the following files in Visualisation/Files/:
-- `"model"\_Variants.csv`: Reformatted variants file.
-- `"model"\_Windows.csv`: Reformatted windows file.
-- `"model"\_AllIndex.csv`: Locations of all variants, for faster indexing.
-- `"model"\_FrqIndex.csv`: Subset of AllIndex for 'frequent' (>5%) variants only.
+- `<model>_Variants.csv`: Reformatted variants file.
+- `<model>_Windows.csv`: Reformatted windows file.
+- `<model>_AllIndex.csv`: Locations of all variants, for faster indexing.
+- `<model>_FrqIndex.csv`: Subset of AllIndex for 'frequent' (>5%) variants only.
 - `annotation.txt`: The annotation file use for your SVPop Analysis run.
 
 These files can be created for a post-SVPop Analysis run with `SVPop --PREPROCESS --variantFile=YOUR_PREFIX`.
