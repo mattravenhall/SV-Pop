@@ -309,8 +309,8 @@ if not multithread:
         sys.stdout.write('\r'+datetime.datetime.now().strftime('{colTime}[%d-%b-%Y %H:%M:%S]{colReset} '.format(**globals())+message))
         sys.stdout.flush()
 else:
-    def printR(message, file=sys.stdout):
-        printT(message, file=file)
+    def printR(message, flush=True, file=sys.stdout):
+        printT(message, file=file, flush=flush)
 
 # set user-indicated variables
 def checkArg(valueGiven, givenArg, isBool=False):
@@ -979,10 +979,10 @@ def simpleLog(chrChunk, SampleID, stat, statName, logfile):
 def analyseChr(chrChunk):
     printT('Conducting analysis for chromosome {0}.'.format(chrChunk), file=sys.stdout)
     with open('{0}_{1}_{2}.log'.format(outFile, MODEL, chrChunk), 'a') as f:
-        printT('Conducting analysis for chromosome {0}.'.format(chrChunk), file=f)
+        printT('Conducting analysis for chromosome {0}.'.format(chrChunk), file=f, flush=True)
 
         # Read in vcf files, clean up for stats
-        printT('Reading in structural variants vcf file/s for chromosome {0}.'.format(chrChunk), file=f)
+        printT('Reading in structural variants vcf file/s for chromosome {0}.'.format(chrChunk), file=f, flush=True)
         outDat = pd.DataFrame() # merge holder
         skippedFiles = []
         skippedCount = 0
@@ -993,7 +993,7 @@ def analyseChr(chrChunk):
             # Processing count
             num += 1
             if num % 500 == 0:
-                printR('Processing sample {0} of {1}.'.format(num,len(samples)), file=f)
+                printR('Processing sample {0} of {1}.'.format(num,len(samples)), file=f, flush=True)
 
             # Check file exists before reading
             variantsExist = os.path.isfile(SampleID)
@@ -1083,13 +1083,13 @@ def analyseChr(chrChunk):
 
                             # Filter down to only verified variants
                             if not quietConcordance:
-                                printT('{0} of {1} variants were verified ({2}%, {3}).'.format(sum(concordanceLog), len(concordanceLog), round(100*sum(concordanceLog)/len(concordanceLog),2), SampleID.lstrip('.').partition('.')[0].split('/')[-1]), file=f)
+                                printT('{0} of {1} variants were verified ({2}%, {3}).'.format(sum(concordanceLog), len(concordanceLog), round(100*sum(concordanceLog)/len(concordanceLog),2), SampleID.lstrip('.').partition('.')[0].split('/')[-1]), file=f, flush=True)
                             if percConcordance == 1:
                                 dat = dat.loc[concordanceLog]
                             dat = dat.assign(Concordance=[int(x) for x in concordanceLog])
                         else:
                             if not quietConcordance:
-                                printT('No variants present for verification. ({0})'.format(SampleID.partition('.')[0].split('/')[-1]), file=f)
+                                printT('No variants present for verification. ({0})'.format(SampleID.partition('.')[0].split('/')[-1]), file=f, flush=True)
                             dat = dat.assign(Concordance=0)
                             dat = dat.loc[[False]*dat.shape[0]]
 
@@ -1150,19 +1150,19 @@ def analyseChr(chrChunk):
             gc.collect()
 
         # Informing user regarding missed files.
-        printT("{0} file/s could not be located.".format(skippedCount), file=f)
+        printT("{0} file/s could not be located.".format(skippedCount), file=f, flush=True)
         if skippedCount > 0:
-            printT("Writing skipped file/s to skippedFiles_{0}_{1}.log".format(MODEL,chrChunk), file=f)
+            printT("Writing skipped file/s to skippedFiles_{0}_{1}.log".format(MODEL,chrChunk), file=f, flush=True)
             with open('skippedFiles_{0}_{1}.log'.format(MODEL,chrChunk),'a') as skipLog:
                 for item in skippedFiles:
                     skipLog.write("{0}\n".format(item))
 
         # Check if whole chromosome was empty. If so, skip to next.
         if (skippedCount >= len(samples)):
-            printT('No variants found in {0}, skipping chromosome.'.format(chrChunk), file=f)
+            printT('No variants found in {0}, skipping chromosome.'.format(chrChunk), file=f, flush=True)
         else:
             # Clean nan's from Samples, Precision and Quality (and Length and Reads)
-            printT('Removing NA calls.', file=f)
+            printT('Removing NA calls.', file=f, flush=True)
             outDat['Samples'] = outDat.Samples.str.replace(',nan,',',')
             outDat['Samples'] = outDat.Samples.str.replace('nan,','')
             outDat['Samples'] = outDat.Samples.str.replace(',nan','')
@@ -1209,7 +1209,7 @@ def analyseChr(chrChunk):
                 outDat['Concordance'] = outDat.Concordance.str.replace(',nan','')
 
             # Pull Chr, Start and End out of Location
-            printT('Properly formatting genomic locations.', file=f)
+            printT('Properly formatting genomic locations.', file=f, flush=True)
             Locs = pd.DataFrame(outDat.Location.str.split('-').tolist(),columns=['Chromosome','Start','End'])
             outDat['Chromosome'] = Locs['Chromosome']
             outDat['Start'] = pd.to_numeric(Locs['Start'])
@@ -1225,7 +1225,7 @@ def analyseChr(chrChunk):
 
             # Filter out variants which overlap with assembly gaps
             if filterGaps:
-                printT('Filtering out variants that cover known assembly gaps.', file=f)
+                printT('Filtering out variants that cover known assembly gaps.', file=f, flush=True)
                 gapsChunk = gaps.loc[gaps.Chromosome.astype(str) == chrChunk]
                 gapVariants = []
                 for row in gapsChunk.itertuples():
@@ -1235,7 +1235,7 @@ def analyseChr(chrChunk):
                     printT('Writing gap overlap variants to {0}.'.format(gapOverlapFile))
                     outDat.iloc[gapVariants].to_csv(gapOverlapFile, index=False)
                 outDat.drop(gapVariants, inplace=True)
-                printT('{0:,} variants removed from chromosome {1} due to assembly gap overlap.'.format(len(gapVariants),chrChunk), file=f)
+                printT('{0:,} variants removed from chromosome {1} due to assembly gap overlap.'.format(len(gapVariants),chrChunk), file=f, flush=True)
 
             outDat = outDat.sort_values(by=['Chromosome','Start']) # Sort by start position
 
@@ -1251,7 +1251,7 @@ def analyseChr(chrChunk):
             if filterConcordance:
                 meanConcordance = []
 
-            printT('Calculating variant-based statistics.', file=f)
+            printT('Calculating variant-based statistics.', file=f, flush=True)
             for row in outDat.itertuples():
                 sampleCell = row[(list(outDat.columns).index('Samples')+1)].split(',')
                 qualityCell = row[(list(outDat.columns).index('Quality')+1)].split(',')
@@ -1315,12 +1315,12 @@ def analyseChr(chrChunk):
             SubPopCols = []
             if len(subPops) > 0:
                 for popType in subPopInfo.columns[1:]:
-                    printT('Calculating sub-populations frequencies for {}'.format(popType), file=f)
+                    printT('Calculating sub-populations frequencies for {}'.format(popType), file=f, flush=True)
                     currSubPop = list(set(subPopInfo[popType]))
                     currSubPop.sort()
                     for index, pop in enumerate(currSubPop):
                         nPop = sum(subPopInfo[popType]==pop)
-                        printR('Processing: {0} of {1} sub-populations.'.format(index+1,len(currSubPop)), file=f)
+                        printR('Processing: {0} of {1} sub-populations.'.format(index+1,len(currSubPop)), file=f, flush=True)
                         currPop = subPopInfo['Sample'][subPopInfo[popType] == pop].tolist()
                         #popCounts = [sum([p in currPop for p in outDat.Samples[row].split(',')]) for row in range(outDat.shape[0])]
                         popFreqs = [round(sum([p in currPop for p in outDat.Samples.iloc[row].split(',')])/nPop,3) for row in range(outDat.shape[0])]
@@ -1359,7 +1359,7 @@ def analyseChr(chrChunk):
             # Calculate Fst
             if len(subPops) > 0 and doFst:
                 for popType in subPopInfo.columns[1:]:
-                    printT('Calculating Fst for {}'.format(popType), file=f)
+                    printT('Calculating Fst for {}'.format(popType), file=f, flush=True)
                     popCols = pd.Series(SubPopCols)[pd.Series(SubPopCols).str.startswith(popType)]
                     outDat[popType+'_Fst'] = outDat[popCols].apply(calcFstNei,axis=1)
                     keptColumns.append(popType+'_Fst')
@@ -1371,10 +1371,10 @@ def analyseChr(chrChunk):
             foreLength = outDat.shape[0]
             minCheck = outDat.loc[outDat.Length > minLength]   # indicated by minLength variable
             underMinLength = foreLength - minCheck.shape[0]
-            printT('{0:,} variants removed from chromosome {1} due to exceeding minLength.'.format(underMinLength,chrChunk), file=f)
+            printT('{0:,} variants removed from chromosome {1} due to exceeding minLength.'.format(underMinLength,chrChunk), file=f, flush=True)
             if underMinLength > 0:
                 underMinFile = 'underMinLength_{0}_{1}.log'.format(MODEL,chrChunk)
-                printT('Writing underMinLength variants to {0}.'.format(underMinFile), file=f)
+                printT('Writing underMinLength variants to {0}.'.format(underMinFile), file=f, flush=True)
                 outDat.loc[outDat.Length <= minLength].to_csv(underMinFile, index=False)   # indicated by minLength variable
                 outDat = minCheck
 
@@ -1382,10 +1382,10 @@ def analyseChr(chrChunk):
             foreLength = outDat.shape[0]
             maxCheck = outDat.loc[outDat.Length < maxLength]   # indicated by maxLength variable
             overMaxLength = foreLength - maxCheck.shape[0]
-            printT('{0:,} variants removed from chromosome {1} due to exceeding maxLength.'.format(overMaxLength,chrChunk), file=f)
+            printT('{0:,} variants removed from chromosome {1} due to exceeding maxLength.'.format(overMaxLength,chrChunk), file=f, flush=True)
             if overMaxLength > 0:
                 overMaxFile = 'overMaxLength_{0}_{1}.log'.format(MODEL,chrChunk)
-                printT('Writing overMaxLength variants to {0}.'.format(overMaxFile), file=f)
+                printT('Writing overMaxLength variants to {0}.'.format(overMaxFile), file=f, flush=True)
                 outDat.loc[outDat.Length >= maxLength].to_csv(overMaxFile, index=False)   # indicated by maxLength variable
                 outDat = maxCheck
 
@@ -1397,7 +1397,7 @@ def analyseChr(chrChunk):
 
             # Annotate variants
             if doAnnotation and writeVariants:
-                printT('Annotating {} variants.'.format(outDat.shape[0]), file=f)
+                printT('Annotating {} variants.'.format(outDat.shape[0]), file=f, flush=True)
                 annots = []
                 count = 0
                 for row in outDat.itertuples():
@@ -1419,12 +1419,12 @@ def analyseChr(chrChunk):
             # Writing variant files out
             if writeVariants:
                 fileName = '{0}_{1}_{2}_variants{3}_v{4}.csv'.format(outFile,MODEL,chrChunk,'_annotated' if doAnnotation else '',VERSION_NUM)
-                printT('Writing variant output as {0}'.format(fileName), file=f)
+                printT('Writing variant output as {0}'.format(fileName), file=f, flush=True)
                 outDat.to_csv(fileName,index=False)
 
             # Write out windows files
             if writeWindows and outDat.shape[0] > 0:
-                printT('Writing window output for {0}'.format(chrChunk), file=f)
+                printT('Writing window output for {0}'.format(chrChunk), file=f, flush=True)
                 doWriteWindows(outDat=outDat,windowStep=windowStep,doAnnotation=doAnnotation,windowType=windowType, logFile=f)
 
 def runMain():
