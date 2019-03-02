@@ -51,7 +51,7 @@ if (length(models) == 1) {
     if (model == names(models[2])) {
       VARs <- rbind(get(names(models)[1]), get(names(models)[2]))
     } else {
-      VARs <- rbind(VARS, get(model))
+      VARs <- rbind(VARs, get(model))
     }
   }
 }

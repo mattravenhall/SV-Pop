@@ -76,7 +76,7 @@ maximumPercRef = 0.1
 maximumPercHet = 0.3
 excludeDupPercHet = False
 minimumPercAlt = None
-maximumPercMissing = 0.1
+maximumPercMissing = None #0.1
 removeIntergenic = False
 minimumPE = 0
 minimumSR = 0
@@ -587,6 +587,8 @@ def doWriteWindows(outDat, windowStep=windowStep, doAnnotation=doAnnotation, Ref
                 printR('Annotating window {0:,} of {1:,}.'.format(count,outDat.shape[0]), file=logFile)
         outDat['Feature'] = annots
 
+    if 'MODEL' not in locals():
+        MODEL = 'ALL'
     fileName = '{0}_{1}_{2}_windows{3}_v{4}.csv'.format(outFile,MODEL,chrNo,'_annotated' if doAnnotation else '', VERSION_NUM)
     printT('Writing window output as {0}'.format(fileName), file=logFile)
     outDat.to_csv('{0}'.format(fileName),index=False)
@@ -627,26 +629,30 @@ def doFilterVariants(variantFile, model=MODEL, minimumQuality=minimumQuality, mi
     outDat = filtered.copy()
     preRows = filtered.shape[0]
     printT('Pre-Filter Rows: {0:,}'.format(preRows),file=logFile)
+ 
+    filterColumns = ['Quality','Precision','PercRef','PercHet','PercAlt','PercMissing','Feature','Concordance']
+    missingCols = [i for i in filterColumns if i not in filtered.columns]
+    printT('Warning: {0} missing columns {1}, skipping filtering for these.'.format(len(missingCols), missingCols), file=logFile)
 
-    if minimumQuality != None:       # Remove poor quality variants
+    if minimumQuality != None and 'Quality' in filtered.columns:       # Remove poor quality variants
         filtered = filtered[filtered['Quality'] >= minimumQuality]
         failed = outDat[outDat['Quality'] < minimumQuality]
         stats = failed.shape[0]
-        printT('{0:,} variants removed for sub-par DELLY quality scores (paired read support).'.format(stats), file=logFile)
+        printT('{0:,} variants removed for sub-par quality scores (paired read support).'.format(stats), file=logFile)
         if stats > 0:
             failFile = 'poorQuality_{0}.log'.format(model)
             printT('Writing sub-par quality variants to {0}'.format(failFile), file=logFile)
             failed.to_csv(failFile,index=False)
-    if minimumPrecision != None:     # Remove poor precision variants
+    if minimumPrecision != None and 'Precision' in filtered.columns:     # Remove poor precision variants
         filtered = filtered[filtered['Precision'] >= minimumPrecision]
         failed = outDat[outDat['Precision'] < minimumPrecision]
         stats = failed.shape[0]
-        printT('{0:,} variants removed for sub-par DELLY precision scores (split read support).'.format(stats), file=logFile)
+        printT('{0:,} variants removed for sub-par precision scores (split read support).'.format(stats), file=logFile)
         if stats > 0:
             failFile = 'poorPrecision_{0}.log'.format(model)
             printT('Writing sub-par precision variants to {0}'.format(failFile), file=logFile)
             failed.to_csv(failFile,index=False)
-    if maximumPercRef != None:      # Remove homozygous reference calls
+    if maximumPercRef != None and 'PercRef' in filtered.columns:      # Remove homozygous reference calls
         filtered = filtered[filtered['PercRef'] <= maximumPercRef]
         failed = outDat[outDat['PercRef'] > maximumPercRef]
         stats = failed.shape[0]
@@ -655,7 +661,7 @@ def doFilterVariants(variantFile, model=MODEL, minimumQuality=minimumQuality, mi
             failFile = 'excessiveHom_{0}.log'.format(model)
             printT('Writing excessive homozygous variants to {0}'.format(failFile), file=logFile)
             failed.to_csv(failFile,index=False)
-    if maximumPercHet != None:
+    if maximumPercHet != None and 'PercHet' in filtered.columns:
         if excludeDupPercHet and model == 'DUP':
             pass
         else:
@@ -667,7 +673,7 @@ def doFilterVariants(variantFile, model=MODEL, minimumQuality=minimumQuality, mi
                 failFile = 'excessiveHet_{0}.log'.format(model)
                 printT('Writing excessive heterozygous variants to {0}'.format(failFile), file=logFile)
                 failed.to_csv(failFile,index=False)
-    if minimumPercAlt != None:      # Require homozygous alternative calls
+    if minimumPercAlt != None and 'PercAlt' in filtered.columns:      # Require homozygous alternative calls
         filtered = filtered[filtered['PercAlt'] >= minimumPercAlt]
         failed = outDat[outDat['PercAlt'] < minimumPercAlt]
         stats = failed.shape[0]
@@ -676,7 +682,7 @@ def doFilterVariants(variantFile, model=MODEL, minimumQuality=minimumQuality, mi
             failFile = 'insufficientHom_{0}.log'.format(model)
             printT('Writing insufficient homozygous variants to {0}'.format(failFile), file=logFile)
             failed.to_csv(failFile,index=False)
-    if maximumPercMissing != None:  # Remove missing calls
+    if maximumPercMissing != None and 'PercMissing' in filtered.columns:  # Remove missing calls
         filtered = filtered[filtered['PercMissing'] <= maximumPercMissing]
         failed = outDat[outDat['PercMissing'] > maximumPercMissing]
         stats = failed.shape[0]
@@ -685,7 +691,7 @@ def doFilterVariants(variantFile, model=MODEL, minimumQuality=minimumQuality, mi
             failFile = 'excessiveMis_{0}.log'.format(model)
             printT('Writing excessive missingness variants to {0}'.format(failFile), file=logFile)
             failed.to_csv(failFile,index=False)
-    if removeIntergenic:            # Remove intergenic variants
+    if removeIntergenic and 'Feature' in filtered.columns:            # Remove intergenic variants
         if sum(filtered.Feature.astype(str) == 'nan') > 0:
             filtered = filtered[filtered['Feature'].astype(str) != 'nan']
             stats = sum(outDat['Feature'].astype(str) == 'nan')
@@ -693,7 +699,7 @@ def doFilterVariants(variantFile, model=MODEL, minimumQuality=minimumQuality, mi
             filtered = filtered[filtered['Feature'].astype(str) != '']
             stats = sum(outDat['Feature'].astype(str) == '')
         printT('-{0:,} variants removed due to being intergenic.'.format(stats), file=logFile)
-    if percConcordance > 0: # Filter by concordance
+    if percConcordance > 0 and 'Concordance' in filtered.columns: # Filter by concordance
         foreLength = outDat.shape[0]
         concCheck = outDat.loc[outDat.Concordance >= percConcordance]
         noConcordance = foreLength - concCheck.shape[0]
@@ -1019,7 +1025,10 @@ def analyseChr(chrChunk):
                 else:
                     # Clean to vitals
                     dat = dat.assign(End=dat.Info.str.partition(';END=')[2].str.partition(';')[0])
-                    dat = dat.assign(Precision=dat.Info.str.partition(';')[0])
+                    if dat.Info.str.partition(';')[0][0] in ['PRECISE','IMPRECISE']:
+                        dat = dat.assign(Precision=dat.Info.str.partition(';')[0])
+                    else:
+                        dat = dat.assign(Precision='.')
                     dat = dat.assign(Samples=SampleID.split('.')[-2].split('/')[-1]) # remove file suffix and directories, nb. lack of . or / may break this...
 
                     # Pull raw read counts
@@ -1031,9 +1040,9 @@ def analyseChr(chrChunk):
 
                     # Additional map stats
                     if MoreQual:
-                        dat = dat.assign(PE=dat.Info.str.partition(';PE=')[2].str.partition(';')[0])        # Num. supporting PE reads
-                        dat = dat.assign(SR=dat.Info.str.partition('SR=')[2].str.partition(';')[0])         # Num. supporting SR reads
-                        dat = dat.assign(MapQual=dat.Info.str.partition('MAPQ=')[2].str.partition(';')[0])  # Median mapping quality
+                        dat = dat.assign(PE=dat.Info.str.partition(';PE=')[2].str.partition(';')[0])#.replace('','nan'))        # Num. supporting PE reads
+                        dat = dat.assign(SR=dat.Info.str.partition('SR=')[2].str.partition(';')[0])#.replace('','nan'))         # Num. supporting SR reads
+                        dat = dat.assign(MapQual=dat.Info.str.partition('MAPQ=')[2].str.partition(';')[0])#.replace('','nan'))  # Median mapping quality
 
                     # Include phasing values
                     if PullPhasing:
@@ -1215,7 +1224,8 @@ def analyseChr(chrChunk):
             outDat['Start'] = pd.to_numeric(Locs['Start'])
             outDat['End'] = pd.to_numeric(Locs['End'])
             if MODEL != 'INS': # Only for non-INS
-                outDat['Length'] = (outDat.End.astype(int) - outDat.Start.astype(int))
+                # NaNs may appear with SV types such as BND, these should be filtered but handling here involves enforcing a negative length
+                outDat['Length'] = (outDat.End.replace(np.nan,0).astype(int) - outDat.Start.astype(int))
 
             # Longer reads with poor PE support tend to be false, removing.
             if MoreQual and doFiltering and MODEL != 'INS':
@@ -1277,12 +1287,12 @@ def analyseChr(chrChunk):
 
                 if MoreQual:
                     splitReads = [x for x in row[(list(outDat.columns).index('SR')+1)].split(',') if x != '']
-                    pairedEnds = row[(list(outDat.columns).index('PE')+1)].split(',')
-                    mappingQuals = row[(list(outDat.columns).index('MapQual')+1)].split(',')
+                    pairedEnds = [x for x in row[(list(outDat.columns).index('PE')+1)].split(',') if x != '']
+                    mappingQuals = [x for x in row[(list(outDat.columns).index('MapQual')+1)].split(',') if x != '']
 
                     splitReadsMedian.append(int(pd.Series(splitReads).median()) if splitReads != [] else 0)
-                    pairedReadsMedian.append(int(pd.Series(pairedEnds).median()))
-                    mappingQualsMedian.append(int(pd.Series(mappingQuals).median()))
+                    pairedReadsMedian.append(int(pd.Series(pairedEnds).median()) if pairedEnds != [] else 0)
+                    mappingQualsMedian.append(int(pd.Series(mappingQuals).median()) if mappingQuals != [] else 0)
 
                 if PullPhasing:
                     try:
@@ -1486,9 +1496,10 @@ def runMain():
         if minimumPercAlt != None: print('--Minimum Homozygous Alternative Calls Per-Variant: {0}'.format(minimumPercAlt),flush=True)
         if maximumPercMissing != None: print('--Maximum Missing Genotype Calls Per-Variant: {0}'.format(maximumPercMissing),flush=True)
         if removeIntergenic: print('--Removing Intergenic Regions.'.format(removeIntergenic),flush=True)
-        if minimumPE > 0: print('--Removing variants with fewer than {0} supporting paired-end reads.'.format(minimumPE),flush=True)
-        if minimumSR > 0: print('--Removing variants with fewer than {0} supporting split reads.'.format(minimumSR),flush=True)
-        if minimumMAPQ > 0: print('--Removing variants with a median mapping quality below {0}.'.format(minimumMAPQ),flush=True)
+        if MoreQual:
+            if minimumPE > 0: print('--Removing variants with fewer than {0} supporting paired-end reads.'.format(minimumPE),flush=True)
+            if minimumSR > 0: print('--Removing variants with fewer than {0} supporting split reads.'.format(minimumSR),flush=True)
+            if minimumMAPQ > 0: print('--Removing variants with a median mapping quality below {0}.'.format(minimumMAPQ),flush=True)
     print('{colTime}Filter Gaps:{colReset} {}'.format(filterGaps, **globals()),flush=True)
     if filterGaps:
         print('{colTime}--Gaps File:{colReset} {}'.format(gapsFile, **globals()),flush=True)
