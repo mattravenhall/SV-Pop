@@ -46,5 +46,5 @@ These files can be created for a post-SVPop Analysis run with `SVPop --PREPROCES
 
 Expanded help can be found on the [wiki](https://github.com/mattravenhall/SV-Pop/wiki/Visualisation-Expanded-Help).
 
-<!-- ## Citation
-Ravenhall M, Campino S, & Clark T. SV-Pop: Population-based structural variant analysis and visualization. _Manuscript Under Review_ -->
+## Citation
+Matt Ravenhall, Susana Campino and Taane G. Clark. *BMC Bioinformatics* 2019 **20**:136. https://doi.org/10.1186/s12859-019-2718-4
