@@ -12,7 +12,8 @@
 
 # NB: Frequency statistic is calculated as percentage of parsed, not given, samples.
 
-VERSION_NUM =  '1.1'
+VERSION_NUM =  '1.1.1'
+VERSION_NUM_FILE = VERSION_NUM.replace('.','-')
 VERSION_NAME = 'Howdy World'
 VERSION_NOTES = 'Now includes test sets and some bug fixes.'
 
@@ -530,12 +531,12 @@ def doWriteWindows(outDat, windowStep=windowStep, doAnnotation=doAnnotation, Ref
         # [old] as variant sum
         if windowType.lower() == 'variantcount':
             windowCounts.append(sum(outDat.loc[outDat.Start < (windowStart + windowSize)].loc[outDat.End > windowStart].Count))
-            sampleNames.append(pd.Series([n for n in tmpWindow['Samples'].str.split(',') for n in n]).unique())
+            sampleNames.append(pd.Series([n for n in tmpWindow['Samples'].str.split(',') for n in n], dtype='str').unique())
         # [new] as population frequency
         elif windowType.lower() == 'popcount':
             tmpWindow = outDat.loc[outDat.Start < (windowStart + windowSize)].loc[outDat.End > windowStart]
-            windowCounts.append(pd.Series([n for n in tmpWindow['Samples'].str.split(',') for n in n]).unique().shape[0])
-            sampleNames.append(','.join(pd.Series([n for n in tmpWindow['Samples'].str.split(',') for n in n]).unique()))
+            windowCounts.append(pd.Series([n for n in tmpWindow['Samples'].str.split(',') for n in n], dtype='str').unique().shape[0])
+            sampleNames.append(','.join(pd.Series([n for n in tmpWindow['Samples'].str.split(',') for n in n], dtype='str').unique()))
 
     # Combine Start, End and Count lists into a dataframe, held within the holder
     outDat = pd.DataFrame.from_dict({'Chromosome':chrNo,'Start':windowStarts,'End':windowEnds,'Count':windowCounts,'Samples':sampleNames})
@@ -589,7 +590,7 @@ def doWriteWindows(outDat, windowStep=windowStep, doAnnotation=doAnnotation, Ref
 
     if 'MODEL' not in locals():
         MODEL = 'ALL'
-    fileName = '{0}_{1}_{2}_windows{3}_v{4}.csv'.format(outFile,MODEL,chrNo,'_annotated' if doAnnotation else '', VERSION_NUM)
+    fileName = '{0}_{1}_{2}_windows{3}_v{4}.csv'.format(outFile,MODEL,chrNo,'_annotated' if doAnnotation else '', VERSION_NUM_FILE)
     printT('Writing window output as {0}'.format(fileName), file=logFile)
     outDat.to_csv('{0}'.format(fileName),index=False)
 
@@ -712,7 +713,7 @@ def doFilterVariants(variantFile, model=MODEL, minimumQuality=minimumQuality, mi
     if internalFunc:
         return filtered
     else:
-        outputName = '{0}_{1}_ALL_variants{2}_v{3}.csv'.format('Filtered' if outFile == 'outFile' else outFile, model, '_annotated' if 'annotated' in variantFile else '', VERSION_NUM)
+        outputName = '{0}_{1}_ALL_variants{2}_v{3}.csv'.format('Filtered' if outFile == 'outFile' else outFile, model, '_annotated' if 'annotated' in variantFile else '', VERSION_NUM_FILE)
         printT('Writing filtered file to {0}.'.format(outputName), file=logFile)
         filtered.to_csv(outputName,index=False)
 
@@ -779,7 +780,7 @@ def doMergeVariants(variantFiles, model=MODEL,cleanup=True):
         print('{colWarn}Warning: Unable to infer if input files are for variants or windows.{colReset}'.format(**globals()), flush=True)
         variantType = ''
 
-    outputName = '{0}_{1}_chrALL{2}{3}_v{4}.csv'.format('Merged' if outFile == 'outFile' else outFile, model, variantType, '_annotated' if 'annotated' in fileNames[0] else '', VERSION_NUM)
+    outputName = '{0}_{1}_chrALL{2}{3}_v{4}.csv'.format('Merged' if outFile == 'outFile' else outFile, model, variantType, '_annotated' if 'annotated' in fileNames[0] else '', VERSION_NUM_FILE)
     printT('Sorting merged file by Chromosome then Start position')
     Merged = Merged.sort_values(by=['Chromosome','Start'])
     printT('Writing merged file to {0}.'.format(outputName))
@@ -862,7 +863,7 @@ def doMergeModels(variantFiles, models=MODEL, chrSubset=chrSubset):
         variantType = ''
     annotatedCheck = '_annotated' if 'annotated' in vFiles[0] else ''
 
-    outputName = 'AllModels_{3}{0}{1}_v{2}.csv'.format(variantType,annotatedCheck,VERSION_NUM,chrSubset)
+    outputName = 'AllModels_{3}{0}{1}_v{2}.csv'.format(variantType,annotatedCheck,VERSION_NUM_FILE,chrSubset)
     printT('Writing model merged file to {0}.'.format(outputName))
     merged.to_csv(outputName,index=False)
 
@@ -915,7 +916,7 @@ def getSubset(variantFile, region=None, feature=None, statsOnly=False):
 
     # Consider skipping the writing of subsets with no variants.
     if not statsOnly:
-        outputName = '{0}_{1}_v{2}.csv'.format('Subset' if outFile == 'outFile' else outFile, feature if feature is not None else region, VERSION_NUM)
+        outputName = '{0}_{1}_v{2}.csv'.format('Subset' if outFile == 'outFile' else outFile, feature if feature is not None else region, VERSION_NUM_FILE)
         printT('Writing subset to {0}.'.format(outputName))
         variantFile.to_csv(outputName,index=False)
 
@@ -932,8 +933,8 @@ def prepForVisualisation(filePrefix):
         printT('Processing {0}.'.format(model))
 
         # Existing Files
-        varFile = filePrefix+model+'_chrALL_variants_annotated_v'+VERSION_NUM+'.csv'
-        winFile  = filePrefix+model+'_chrALL_windows_annotated_v' +VERSION_NUM+'.csv'
+        varFile = filePrefix+model+'_chrALL_variants_annotated_v'+VERSION_NUM_FILE+'.csv'
+        winFile  = filePrefix+model+'_chrALL_windows_annotated_v' +VERSION_NUM_FILE+'.csv'
 
         # New File Names
         AllIndexName  = '{0}/{1}_AllIndex.csv'.format(outDirName, model)
@@ -1428,7 +1429,7 @@ def analyseChr(chrChunk):
 
             # Writing variant files out
             if writeVariants:
-                fileName = '{0}_{1}_{2}_variants{3}_v{4}.csv'.format(outFile,MODEL,chrChunk,'_annotated' if doAnnotation else '',VERSION_NUM)
+                fileName = '{0}_{1}_{2}_variants{3}_v{4}.csv'.format(outFile,MODEL,chrChunk,'_annotated' if doAnnotation else '',VERSION_NUM_FILE)
                 printT('Writing variant output as {0}'.format(fileName), file=f, flush=True)
                 outDat.to_csv(fileName,index=False)
 
@@ -1686,14 +1687,14 @@ else:
         import glob
         if writeVariants and len(allChromosomes) >= 2:
             printT('Merging per-chromosome variants.')
-            variants = glob.glob('_'.join([outFile,MODEL,'*','variants*','v'+VERSION_NUM+'.csv']))
+            variants = glob.glob('_'.join([outFile,MODEL,'*','variants*','v'+VERSION_NUM_FILE+'.csv']))
             if len(variants) >= 2:
                 doMergeVariants(','.join(variants), model=MODEL)
             else:
                 printT('Too few ({0}) per-chromosome variants to merge.'.format(len(variants)))
         if writeWindows and len(allChromosomes) >= 2:
             printT('Merging per-chromosome windows.')
-            windows = glob.glob('_'.join([outFile,MODEL,'*','windows*','v'+VERSION_NUM+'.csv']))
+            windows = glob.glob('_'.join([outFile,MODEL,'*','windows*','v'+VERSION_NUM_FILE+'.csv']))
             if len(windows) >= 2:
                 doMergeVariants(','.join(windows), model=MODEL)
             else:
