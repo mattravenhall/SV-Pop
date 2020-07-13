@@ -12,10 +12,10 @@
 
 # NB: Frequency statistic is calculated as percentage of parsed, not given, samples.
 
-VERSION_NUM =  '1.1.1'
+VERSION_NUM =  '1.2'
 VERSION_NUM_FILE = VERSION_NUM.replace('.','-')
-VERSION_NAME = 'Howdy World'
-VERSION_NOTES = 'Now includes test sets and some bug fixes.'
+VERSION_NAME = 'Woahfella'
+VERSION_NOTES = 'Increased input validation.'
 
 import gc
 import os
@@ -130,7 +130,7 @@ if __name__ == "__main__":
         print(('{colHelp} Default Help Page.\n\n'+
         '{colInfo} Usage: SVPop.py --command=argument\n'+
         '\n Required Arguments\n'+
-        '  --inFile, -F\t\tFile containing a list of vcf files from DELLY.\n'+
+        '  --inFile, -F\t\tFile containing a list of single-model vcf files from DELLY.\n'+
         '  --model, -M\t\tVariant type. (DUP,DEL,INS,INV)\n'+
         '  --refFile, -R\t\tAnnotation reference file. (gtf,gff,csv,tsv)\t\t(if doAnnotation is True)\n'+ # Must be formatted with four columns (Chromosome, Start, End, Gene)
         '\n Additional Arguments\n'+
@@ -999,8 +999,8 @@ def analyseChr(chrChunk):
         for SampleID in samples:
             # Processing count
             num += 1
-            if num % 500 == 0:
-                printR('Processing sample {0} of {1}.'.format(num,len(samples)), file=f, flush=True)
+            # if num % 500 == 0:
+            printR('Processing sample {0} of {1}.'.format(num,len(samples)), file=f, flush=True)
 
             # Check file exists before reading
             variantsExist = os.path.isfile(SampleID)
@@ -1014,6 +1014,12 @@ def analyseChr(chrChunk):
                 dat = pd.read_table(SampleID,comment='#',header=None,names=hNames,
                     dtype={'Chromosome':str,'Start':int,'Name':str,'X':str,'Type':str,'X2':str,'Quality':str,'Info':str,'Format':str,'Details':str},
                     usecols=['Chromosome','Start','Name','Type','Quality','Info','Format','Details'])
+
+                # Remove non-model structural variants
+                n_orig = dat.shape[0]
+                dat = dat[dat.Type == '<{0}>'.format(MODEL)]
+                if not suppressWarnings:
+                    print('Warning: {0} non-{1} variants were removed from chromosome {2}.'.format(n_orig - dat.shape[0], MODEL, chrChunk),flush=True)
 
                 # Subset to chromosome
                 dat = dat.loc[dat['Chromosome'].astype(str)==str(chrChunk)].reset_index()
