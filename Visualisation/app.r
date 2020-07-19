@@ -58,6 +58,10 @@ if (length(models) == 1) {
 
 chrs = list()
 for (i in unique(VARs$Chromosome)) { chrs[i] = i }
+if (length(names(VARs)) < 7) {
+  print('Error: Input files contain no population indicators.')
+  quit()
+}
 pops = list()
 for (i in names(VARs)[7:dim(VARs)[2]-1]) { pops[i] = i }
 
