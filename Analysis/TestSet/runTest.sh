@@ -9,5 +9,5 @@ popsFile='./pheno.txt'
 # Perform Test Run
 ../SVPop --inFile=${inFile} --model=${model} --refFile=${annot} \
 	--filterGaps=True --gapsFile=${gapsFile} --subPops=${popsFile} \
-	--outFile='./TestRun' #--multithread=False
+	--outFile='./TestRun' --suppressWarnings=False #--multithread=False
 # &> ${model}_TestRun.log &

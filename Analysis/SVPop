@@ -12,7 +12,7 @@
 
 # NB: Frequency statistic is calculated as percentage of parsed, not given, samples.
 
-VERSION_NUM =  '1.2'
+VERSION_NUM =  '1.2.1'
 VERSION_NUM_FILE = VERSION_NUM.replace('.','-')
 VERSION_NAME = 'Woahfella'
 VERSION_NOTES = 'Increased input validation.'
@@ -589,7 +589,10 @@ def doWriteWindows(outDat, windowStep=windowStep, doAnnotation=doAnnotation, Ref
         outDat['Feature'] = annots
 
     if 'MODEL' not in locals():
-        MODEL = 'ALL'
+        if 'MODEL' in globals():
+            MODEL = globals()['MODEL']
+        else:
+            MODEL = 'ALL'
     fileName = '{0}_{1}_{2}_windows{3}_v{4}.csv'.format(outFile,MODEL,chrNo,'_annotated' if doAnnotation else '', VERSION_NUM_FILE)
     printT('Writing window output as {0}'.format(fileName), file=logFile)
     outDat.to_csv('{0}'.format(fileName),index=False)
@@ -1017,7 +1020,7 @@ def analyseChr(chrChunk):
 
                 # Remove non-model structural variants
                 n_orig = dat.shape[0]
-                dat = dat[dat.Type == '<{0}>'.format(MODEL)]
+                dat = dat[dat.Info.str.contains(f"SVTYPE={MODEL}")]
                 if not suppressWarnings:
                     print('Warning: {0} non-{1} variants were removed from chromosome {2}.'.format(n_orig - dat.shape[0], MODEL, chrChunk),flush=True)
 
@@ -1650,7 +1653,7 @@ if runType != 'STANDARD':
             # sys.exit()
 
         for chrChunk in allChromosomes:
-            outDat = outDatFull.ix[outDatFull.Chromosome==chrChunk]
+            outDat = outDatFull[outDatFull.Chromosome==chrChunk]
             if outDat.shape[0] > 0:
                 doWriteWindows(outDat=outDat)
     elif runType == 'FILTER':
@@ -1690,6 +1693,7 @@ else:
     runMain()
 
     if mergeChr:
+        merge_errors = 0
         import glob
         if writeVariants and len(allChromosomes) >= 2:
             printT('Merging per-chromosome variants.')
@@ -1697,15 +1701,20 @@ else:
             if len(variants) >= 2:
                 doMergeVariants(','.join(variants), model=MODEL)
             else:
-                printT('Too few ({0}) per-chromosome variants to merge.'.format(len(variants)))
+                printT(f"{colError}Too few ({len(variants)}) per-chromosome variants to merge.{colReset}")
+                merge_errors += 1
         if writeWindows and len(allChromosomes) >= 2:
             printT('Merging per-chromosome windows.')
             windows = glob.glob('_'.join([outFile,MODEL,'*','windows*','v'+VERSION_NUM_FILE+'.csv']))
             if len(windows) >= 2:
                 doMergeVariants(','.join(windows), model=MODEL)
             else:
-                printT('Too few ({0}) per-chromosome windows to merge.'.format(len(windows)))
-        printT('{colTitle}Merge complete.{colReset}\n'.format(**globals()))
+                printT(f"{colError}Too few ({len(windows)}) per-chromosome windows to merge.{colReset}")
+                merge_errors += 1
+        if merge_errors:
+            printT(f"{colError}{merge_errors} errors encountered during merge.{colReset}"+"\n")
+        else:
+            printT(f"{colTitle}Merge complete.{colReset}"+"\n")
 
     # Brush log files into sub-folder
     if not os.path.exists('./SVPop_Logs'):
