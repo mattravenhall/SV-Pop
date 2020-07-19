@@ -1,5 +1,5 @@
 # SV-Pop
-SV-Pop is designed for post-discovery SV analysis and visualisation, and therefore contains two modules for those purposes. Both modules should work out of the box, but it's a good idea to run preflightchecks.py (in Analysis/) to check that all dependencies are installed, and to optionally add SVPop to your PATH.
+SV-Pop performs post-discovery SV analysis and visualisation; it contains two modules for these purposes. Both modules should work out of the box, but it's a good idea to run preflightchecks.py (in Analysis/) to check that all dependencies are installed, and to optionally add SVPop to your PATH.
 
 Extended documentation, including specifics regarding input files, is present on this repo's [wiki](https://github.com/mattravenhall/SV-Pop/wiki).
 
@@ -40,9 +40,9 @@ The visualisation module will expect the following files in Visualisation/Files/
 - `<model>_Windows.csv`: Reformatted windows file.
 - `<model>_AllIndex.csv`: Locations of all variants, for faster indexing.
 - `<model>_FrqIndex.csv`: Subset of AllIndex for 'frequent' (>5%) variants only.
-- `annotation.txt`: The annotation file use for your SVPop Analysis run.
+- `annotation.txt`: The annotation file used for your SVPop Analysis run (in tsv format).
 
-These files can be created for a post-SVPop Analysis run with `SVPop --PREPROCESS --variantFile=YOUR_PREFIX`.
+These files can be created from a default SVPop Analysis run with `SVPop --PREPROCESS --variantFile=YOUR_PREFIX`.
 
 Expanded help can be found on the [wiki](https://github.com/mattravenhall/SV-Pop/wiki/Visualisation-Expanded-Help).
 
