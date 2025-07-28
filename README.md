@@ -1,4 +1,7 @@
 # SV-Pop
+
+[![release](https://img.shields.io/github/v/release/mattravenhall/SV-Pop)](https://github.com/mattravenhall/SV-Pop/releases) [![docs](https://img.shields.io/badge/read%20the%20wiki-green)](https://github.com/mattravenhall/SV-Pop/wiki) [![doi](https://img.shields.io/badge/doi-10.1186/s12859--019--2718--4-yellow)](https://doi.org/10.1186/s12859-019-2718-4)
+
 SV-Pop performs post-discovery SV analysis and visualisation; it contains two modules for these purposes. Both modules should work out of the box, but it's a good idea to run preflightchecks.py (in Analysis/) to check that all dependencies are installed, and to optionally add SVPop to your PATH.
 
 Extended documentation, including specifics regarding input files, is present on this repo's [wiki](https://github.com/mattravenhall/SV-Pop/wiki).
